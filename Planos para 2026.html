@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planner Estratégico 2026 - Editor de Datas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-neutral: #fdfcfb;
+            --text-main: #2c2c2c;
+            --accent-gold: #c5a059;
+            --soft-gray: #f4f1ee;
+            --border-color: #e5e1dc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f0ee;
+            color: var(--text-main);
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        .presentation-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg-neutral);
+            border-radius: 4px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.05);
+            padding: 60px 80px;
+            position: relative;
+            min-height: 90vh;
+        }
+
+        .playfair { font-family: 'Playfair Display', serif; }
+
+        .header-line {
+            width: 80px;
+            height: 1px;
+            background: var(--accent-gold);
+            margin: 20px 0;
+        }
+
+        .timeline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .month-card {
+            border-left: 1px solid var(--border-color);
+            padding-left: 25px;
+            padding-bottom: 20px;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .month-card::after {
+            content: '+ editar';
+            position: absolute;
+            right: 0;
+            top: 0;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .month-card:hover {
+            border-left-color: var(--accent-gold);
+            transform: translateX(8px);
+            background: rgba(197, 160, 89, 0.02);
+        }
+
+        .month-card:hover::after {
+            opacity: 1;
+        }
+
+        .month-name {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .event-item {
+            margin-bottom: 12px;
+        }
+
+        .event-date {
+            font-size: 22px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .event-title {
+            font-size: 15px;
+            color: #555;
+            font-weight: 400;
+        }
+
+        .strategy-tag {
+            font-size: 9px;
+            background: var(--soft-gray);
+            padding: 2px 8px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        /* MODAL E CALENDÁRIO INDIVIDUAL */
+        #monthModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(44, 44, 44, 0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        #monthModal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--bg-neutral);
+            width: 95%;
+            max-width: 1000px;
+            max-height: 90vh;
+            padding: 50px;
+            border-radius: 2px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.4s ease;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        #monthModal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .calendar-day-header {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #666;
+            border: 1px solid transparent;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-day:hover {
+            background-color: var(--soft-gray);
+            color: var(--accent-gold);
+        }
+
+        .calendar-day.selected {
+            background-color: #fff;
+            border: 1.5px solid var(--accent-gold);
+            color: var(--accent-gold);
+            font-weight: 800;
+            box-shadow: 0 0 10px rgba(197, 160, 89, 0.2);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.event {
+            background: var(--soft-gray);
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .calendar-day.event::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover { color: var(--text-main); }
+
+        /* FORMULÁRIO DE EDIÇÃO */
+        .editor-section {
+            background: #fdfcfb;
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            margin-bottom: 5px;
+        }
+
+        .input-field {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            margin-bottom: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            border-bottom-color: var(--accent-gold);
+        }
+
+        .btn-gold {
+            background: var(--accent-gold);
+            color: white;
+            padding: 12px 30px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .btn-gold:hover { 
+            background: #b38d4a;
+            box-shadow: 0 4px 12px rgba(197, 160, 89, 0.3);
+        }
+
+        .modal-grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .selection-hint {
+            font-size: 11px;
+            color: var(--accent-gold);
+            font-style: italic;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-grid-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="presentation-page relative">
+        <!-- Header -->
+        <header class="relative z-10 mb-12">
+            <span class="text-xs uppercase tracking-[5px] text-gray-400">Planejamento Interativo</span>
+            <h1 class="playfair text-6xl mt-4 text-gray-800 italic leading-tight">Planner de <br>Estratégias 2026</h1>
+            <div class="header-line"></div>
+            <p class="max-w-xl text-gray-500 font-light leading-relaxed">
+                Clique nos meses para abrir o calendário. Você pode selecionar o dia diretamente na grade para adicionar novos eventos.
+            </p>
+        </header>
+
+        <!-- Timeline Grid -->
+        <div id="mainGrid" class="timeline-grid relative z-10">
+            <!-- Gerado via JS -->
+        </div>
+
+        <div class="mt-20 text-center font-light italic text-gray-400 text-sm playfair">
+            "Design é onde a ciência e a arte se encontram."
+        </div>
+    </div>
+
+    <!-- Modal para Detalhes e Edição -->
+    <div id="monthModal">
+        <div class="modal-content">
+            <div class="close-modal" onclick="closeModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+            
+            <div class="modal-grid-layout">
+                <!-- Coluna 1: Calendário e Info -->
+                <div>
+                    <span class="month-name" id="modalMonthName">Janeiro</span>
+                    <h2 class="playfair text-4xl mt-2 mb-6">Visão Mensal</h2>
+                    
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Gerado via JS -->
+                    </div>
+
+                    <p class="selection-hint">
+                        <i class="fa-solid fa-arrow-pointer"></i> Clique em um dia para selecioná-lo.
+                    </p>
+
+                    <div class="mt-10" id="modalEventsList">
+                        <!-- Lista de eventos -->
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Editor -->
+                <div class="flex flex-col justify-center">
+                    <div class="editor-section">
+                        <h3 class="playfair text-3xl mb-8">Planejar Ação</h3>
+                        
+                        <div class="input-group">
+                            <label>Dia Selecionado</label>
+                            <input type="number" id="newDay" class="input-field" min="1" max="31" placeholder="Selecione no calendário...">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Título da Data</label>
+                            <input type="text" id="newTitle" class="input-field" placeholder="Ex: Campanha de Outono">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Estratégia / Objetivo</label>
+                            <input type="text" id="newStrategy" class="input-field" placeholder="Ex: Engajamento / Reels">
+                        </div>
+
+                        <button class="btn-gold mt-6" onclick="saveNewEvent()">Adicionar ao Planner</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados mestre dos meses
+        let monthsData = [
+            { name: 'Março', id: 2, startDay: 0, days: 31, events: [
+                { d: 8, t: 'Dia Int. da Mulher', s: 'Branding / Homenagem' },
+                { d: 20, t: 'Início do Outono', s: 'Campanha Sazonal' }
+            ]},
+            { name: 'Abril', id: 3, startDay: 3, days: 30, events: [
+                { d: 3, t: 'Sexta-feira Santa', s: 'Horário Reduzido' },
+                { d: 5, t: 'Páscoa', s: 'Interatividade / Kids' }
+            ]},
+            { name: 'Maio', id: 4, startDay: 5, days: 31, events: [
+                { d: 1, t: 'Dia do Trabalho', s: 'Institucional' },
+                { d: 10, t: 'Dia das Mães', s: 'Campanha de Vendas' }
+            ]},
+            { name: 'Junho', id: 5, startDay: 1, days: 30, events: [
+                { d: 4, t: 'Corpus Christi', s: 'Feriado Nacional' },
+                { d: 12, t: 'Dia dos Namorados', s: 'Promoção Casais' }
+            ]},
+            { name: 'Agosto', id: 7, startDay: 6, days: 31, events: [
+                { d: 9, t: 'Dia dos Pais', s: 'Campanha de Vendas' }
+            ]},
+            { name: 'Outubro', id: 9, startDay: 4, days: 31, events: [
+                { d: 12, t: 'Dia das Crianças', s: 'Social / Filantropia' },
+                { d: 31, t: 'Halloween', s: 'Engajamento / Reels' }
+            ]},
+            { name: 'Novembro', id: 10, startDay: 0, days: 30, events: [
+                { d: 20, t: 'Consciência Negra', s: 'Educação / Diversidade' },
+                { d: 27, t: 'Black Friday', s: 'Ofertas Agressivas' }
+            ]},
+            { name: 'Dezembro', id: 11, startDay: 2, days: 31, events: [
+                { d: 25, t: 'Natal', s: 'Humanização' },
+                { d: 31, t: 'Réveillon', s: 'Expectativa 2027' }
+            ]}
+        ];
+
+        let currentEditingIndex = null;
+        let selectedDay = null;
+
+        // Renderiza a grade principal (Cards)
+        function renderMainGrid() {
+            const mainGrid = document.getElementById('mainGrid');
+            mainGrid.innerHTML = '';
+            
+            monthsData.forEach((month, index) => {
+                const card = document.createElement('div');
+                card.className = 'month-card';
+                card.onclick = () => openMonth(index);
+                
+                month.events.sort((a, b) => a.d - b.d);
+                
+                let eventsHtml = '';
+                month.events.slice(0, 3).forEach(ev => {
+                    eventsHtml += `
+                        <div class="event-item">
+                            <span class="event-date playfair">${ev.d.toString().padStart(2, '0')}</span>
+                            <span class="event-title">${ev.t}</span>
+                        </div>
+                    `;
+                });
+
+                if (month.events.length > 3) {
+                    eventsHtml += `<div class="text-[10px] text-gray-400 italic mt-2">+ ${month.events.length - 3} itens</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="month-name">${month.name}</div>
+                    ${eventsHtml || '<p class="text-[10px] italic text-gray-300">Sem eventos</p>'}
+                `;
+                mainGrid.appendChild(card);
+            });
+        }
+
+        function openMonth(index) {
+            currentEditingIndex = index;
+            selectedDay = null;
+            const month = monthsData[index];
+            const modal = document.getElementById('monthModal');
+            
+            document.getElementById('modalMonthName').innerText = month.name;
+            
+            renderCalendar(month);
+            renderModalEvents(month);
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            
+            document.getElementById('newDay').value = '';
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newStrategy').value = '';
+        }
+
+        function selectDayInGrid(dayNumber) {
+            selectedDay = dayNumber;
+            document.getElementById('newDay').value = dayNumber;
+            
+            // Re-renderizar calendário para mostrar o destaque
+            renderCalendar(monthsData[currentEditingIndex]);
+        }
+
+        function renderCalendar(month) {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            const daysShort = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+            daysShort.forEach(d => {
+                const h = document.createElement('div');
+                h.className = 'calendar-day-header';
+                h.innerText = d;
+                grid.appendChild(h);
+            });
+
+            for (let i = 0; i < month.startDay; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+
+            for (let i = 1; i <= month.days; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                day.innerText = i;
+                
+                if (month.events.find(e => e.d === i)) day.classList.add('event');
+                if (selectedDay === i) day.classList.add('selected');
+                
+                day.onclick = (e) => {
+                    e.stopPropagation();
+                    selectDayInGrid(i);
+                };
+                
+                grid.appendChild(day);
+            }
+        }
+
+        function renderModalEvents(month) {
+            const eventsList = document.getElementById('modalEventsList');
+            let html = '<h4 class="text-xs uppercase tracking-widest text-gray-400 mb-6 border-b border-gray-100 pb-2">Ativações Confirmadas</h4>';
+            
+            month.events.sort((a,b) => a.d - b.d).forEach((ev, evIdx) => {
+                html += `
+                    <div class="flex justify-between items-center group mb-4 pb-4 border-b border-gray-50">
+                        <div class="flex items-start gap-4">
+                            <span class="playfair text-2xl font-bold text-gray-800">${ev.d.toString().padStart(2, '0')}</span>
+                            <div>
+                                <div class="font-bold text-sm">${ev.t}</div>
+                                <div class="strategy-tag">${ev.s}</div>
+                            </div>
+                        </div>
+                        <button onclick="removeEvent(${evIdx})" class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all px-2">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            eventsList.innerHTML = html || '<p class="text-sm italic text-gray-300">Nenhuma ativação planejada.</p>';
+        }
+
+        function saveNewEvent() {
+            const day = parseInt(document.getElementById('newDay').value);
+            const title = document.getElementById('newTitle').value;
+            const strategy = document.getElementById('newStrategy').value;
+
+            if (!day || !title || day < 1 || day > 31) {
+                alert("Por favor, selecione um dia e dê um título à data.");
+                return;
+            }
+
+            monthsData[currentEditingIndex].events.push({ d: day, t: title, s: strategy });
+            
+            selectedDay = null; // Reset seleção
+            renderCalendar(monthsData[currentEditingIndex]);
+            renderModalEvents(monthsData[currentEditingIndex]);
+            renderMainGrid();
+
+            document.getElementById('newDay').value = '';
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newStrategy').value = '';
+        }
+
+        function removeEvent(evIdx) {
+            monthsData[currentEditingIndex].events.splice(evIdx, 1);
+            renderCalendar(monthsData[currentEditingIndex]);
+            renderModalEvents(monthsData[currentEditingIndex]);
+            renderMainGrid();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('monthModal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 400);
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('monthModal');
+            if (event.target == modal) closeModal();
+        }
+
+        window.onload = renderMainGrid;
+    </script>
+</body>
+</html>
