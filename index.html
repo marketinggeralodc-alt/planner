@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner Estratégico 2026 - Editor de Datas</title>
+    <title>Planner Estratégico 2026 - Versão Final Estável</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -81,9 +81,7 @@
             background: rgba(197, 160, 89, 0.02);
         }
 
-        .month-card:hover::after {
-            opacity: 1;
-        }
+        .month-card:hover::after { opacity: 1; }
 
         .month-name {
             font-size: 12px;
@@ -94,22 +92,9 @@
             margin-bottom: 15px;
         }
 
-        .event-item {
-            margin-bottom: 12px;
-        }
-
-        .event-date {
-            font-size: 22px;
-            font-weight: 700;
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        .event-title {
-            font-size: 15px;
-            color: #555;
-            font-weight: 400;
-        }
+        .event-item { margin-bottom: 12px; }
+        .event-date { font-size: 22px; font-weight: 700; display: block; margin-bottom: 2px; }
+        .event-title { font-size: 15px; color: #555; font-weight: 400; }
 
         .strategy-tag {
             font-size: 9px;
@@ -122,7 +107,7 @@
             margin-top: 4px;
         }
 
-        /* MODAL E CALENDÁRIO INDIVIDUAL */
+        /* MODAL */
         #monthModal {
             position: fixed;
             inset: 0;
@@ -136,10 +121,7 @@
             transition: opacity 0.4s ease;
         }
 
-        #monthModal.active {
-            display: flex;
-            opacity: 1;
-        }
+        #monthModal.active { display: flex; opacity: 1; }
 
         .modal-content {
             background: var(--bg-neutral);
@@ -155,9 +137,7 @@
             overflow-y: auto;
         }
 
-        #monthModal.active .modal-content {
-            transform: translateY(0);
-        }
+        #monthModal.active .modal-content { transform: translateY(0); }
 
         .calendar-grid {
             display: grid;
@@ -189,64 +169,17 @@
             transition: all 0.2s;
         }
 
-        .calendar-day:hover {
-            background-color: var(--soft-gray);
-            color: var(--accent-gold);
-        }
+        .calendar-day:hover { background-color: var(--soft-gray); color: var(--accent-gold); }
+        .calendar-day.selected { border: 1.5px solid var(--accent-gold); color: var(--accent-gold); font-weight: 800; transform: scale(1.05); }
+        .calendar-day.event { background: var(--soft-gray); color: var(--text-main); font-weight: 700; }
+        .calendar-day.event::after { content: ''; position: absolute; bottom: 4px; width: 4px; height: 4px; background: var(--accent-gold); border-radius: 50%; }
 
-        .calendar-day.selected {
-            background-color: #fff;
-            border: 1.5px solid var(--accent-gold);
-            color: var(--accent-gold);
-            font-weight: 800;
-            box-shadow: 0 0 10px rgba(197, 160, 89, 0.2);
-            transform: scale(1.05);
-        }
-
-        .calendar-day.event {
-            background: var(--soft-gray);
-            color: var(--text-main);
-            font-weight: 700;
-        }
-
-        .calendar-day.event::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            width: 4px;
-            height: 4px;
-            background: var(--accent-gold);
-            border-radius: 50%;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            font-size: 20px;
-            color: #999;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-        .close-modal:hover { color: var(--text-main); }
-
-        /* FORMULÁRIO DE EDIÇÃO */
+        /* EDITOR */
         .editor-section {
             background: #fdfcfb;
             border: 1px solid var(--border-color);
             padding: 30px;
-            margin-top: 20px;
             border-radius: 4px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent-gold);
-            margin-bottom: 5px;
         }
 
         .input-field {
@@ -255,15 +188,9 @@
             border: none;
             border-bottom: 1px solid var(--border-color);
             padding: 8px 0;
-            font-family: 'Inter', sans-serif;
             font-size: 14px;
             margin-bottom: 15px;
             outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .input-field:focus {
-            border-bottom-color: var(--accent-gold);
         }
 
         .btn-gold {
@@ -275,310 +202,265 @@
             letter-spacing: 2px;
             border: none;
             cursor: pointer;
-            transition: all 0.3s;
             width: 100%;
             font-weight: 600;
         }
 
-        .btn-gold:hover { 
-            background: #b38d4a;
-            box-shadow: 0 4px 12px rgba(197, 160, 89, 0.3);
-        }
-
-        .modal-grid-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-        }
-
-        .selection-hint {
+        /* STATUS INDICATOR */
+        #saveStatus {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 100px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             font-size: 11px;
-            color: var(--accent-gold);
-            font-style: italic;
-            margin-top: 15px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
+            z-index: 1000;
+            border: 1px solid var(--border-color);
         }
 
-        @media (max-width: 768px) {
-            .modal-grid-layout { grid-template-columns: 1fr; }
-        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+        .status-dot.syncing { background: #f97316; animation: pulse 1s infinite; }
+
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
+    <!-- Indicador de Gravação -->
+    <div id="saveStatus">
+        <div class="status-dot" id="syncIndicator"></div>
+        <span id="statusText">A preparar ligação...</span>
+    </div>
+
     <div class="presentation-page relative">
-        <!-- Header -->
         <header class="relative z-10 mb-12">
-            <span class="text-xs uppercase tracking-[5px] text-gray-400">Planejamento Interativo</span>
-            <h1 class="playfair text-6xl mt-4 text-gray-800 italic leading-tight">Planner de <br>Estratégias 2026</h1>
+            <span class="text-xs uppercase tracking-[5px] text-gray-400">Planeamento Estratégico</span>
+            <h1 class="playfair text-6xl mt-4 text-gray-800 italic leading-tight">Planner de <br>Oportunidades 2026</h1>
             <div class="header-line"></div>
             <p class="max-w-xl text-gray-500 font-light leading-relaxed">
-                Clique nos meses para abrir o calendário. Você pode selecionar o dia diretamente na grade para adicionar novos eventos.
+                As suas alterações são gravadas automaticamente na nuvem. Clique num mês para abrir o calendário detalhado.
             </p>
         </header>
 
-        <!-- Timeline Grid -->
-        <div id="mainGrid" class="timeline-grid relative z-10">
-            <!-- Gerado via JS -->
-        </div>
-
-        <div class="mt-20 text-center font-light italic text-gray-400 text-sm playfair">
-            "Design é onde a ciência e a arte se encontram."
-        </div>
+        <div id="mainGrid" class="timeline-grid relative z-10"></div>
     </div>
 
-    <!-- Modal para Detalhes e Edição -->
+    <!-- Modal Detalhes -->
     <div id="monthModal">
         <div class="modal-content">
-            <div class="close-modal" onclick="closeModal()">
-                <i class="fa-solid fa-xmark"></i>
-            </div>
-            
-            <div class="modal-grid-layout">
-                <!-- Coluna 1: Calendário e Info -->
+            <div class="close-modal" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div>
                     <span class="month-name" id="modalMonthName">Janeiro</span>
-                    <h2 class="playfair text-4xl mt-2 mb-6">Visão Mensal</h2>
-                    
-                    <div class="calendar-grid" id="calendarGrid">
-                        <!-- Gerado via JS -->
-                    </div>
-
-                    <p class="selection-hint">
-                        <i class="fa-solid fa-arrow-pointer"></i> Clique em um dia para selecioná-lo.
-                    </p>
-
-                    <div class="mt-10" id="modalEventsList">
-                        <!-- Lista de eventos -->
-                    </div>
+                    <h2 class="playfair text-4xl mt-2 mb-6 italic">Visão Mensal</h2>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                    <div class="mt-10" id="modalEventsList"></div>
                 </div>
-
-                <!-- Coluna 2: Editor -->
                 <div class="flex flex-col justify-center">
                     <div class="editor-section">
-                        <h3 class="playfair text-3xl mb-8">Planejar Ação</h3>
-                        
-                        <div class="input-group">
-                            <label>Dia Selecionado</label>
-                            <input type="number" id="newDay" class="input-field" min="1" max="31" placeholder="Selecione no calendário...">
+                        <h3 class="playfair text-3xl mb-8 italic text-gray-700 text-center">Planear Ação</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-[10px] uppercase tracking-wider text-gray-400">Dia Selecionado</label>
+                                <input type="number" id="newDay" class="input-field" readonly>
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase tracking-wider text-gray-400">Título do Evento</label>
+                                <input type="text" id="newTitle" class="input-field" placeholder="Ex: Black Friday">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase tracking-wider text-gray-400">Estratégia</label>
+                                <input type="text" id="newStrategy" class="input-field" placeholder="Ex: Campanha Reels">
+                            </div>
+                            <button class="btn-gold mt-4" onclick="saveNewEvent()">Adicionar e Gravar</button>
                         </div>
-
-                        <div class="input-group">
-                            <label>Título da Data</label>
-                            <input type="text" id="newTitle" class="input-field" placeholder="Ex: Campanha de Outono">
-                        </div>
-
-                        <div class="input-group">
-                            <label>Estratégia / Objetivo</label>
-                            <input type="text" id="newStrategy" class="input-field" placeholder="Ex: Engajamento / Reels">
-                        </div>
-
-                        <button class="btn-gold mt-6" onclick="saveNewEvent()">Adicionar ao Planner</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Dados mestre dos meses
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Setup
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-planner-2026';
+
+        // Default Data
         let monthsData = [
-            { name: 'Março', id: 2, startDay: 0, days: 31, events: [
-                { d: 8, t: 'Dia Int. da Mulher', s: 'Branding / Homenagem' },
-                { d: 20, t: 'Início do Outono', s: 'Campanha Sazonal' }
-            ]},
-            { name: 'Abril', id: 3, startDay: 3, days: 30, events: [
-                { d: 3, t: 'Sexta-feira Santa', s: 'Horário Reduzido' },
-                { d: 5, t: 'Páscoa', s: 'Interatividade / Kids' }
-            ]},
-            { name: 'Maio', id: 4, startDay: 5, days: 31, events: [
-                { d: 1, t: 'Dia do Trabalho', s: 'Institucional' },
-                { d: 10, t: 'Dia das Mães', s: 'Campanha de Vendas' }
-            ]},
-            { name: 'Junho', id: 5, startDay: 1, days: 30, events: [
-                { d: 4, t: 'Corpus Christi', s: 'Feriado Nacional' },
-                { d: 12, t: 'Dia dos Namorados', s: 'Promoção Casais' }
-            ]},
-            { name: 'Agosto', id: 7, startDay: 6, days: 31, events: [
-                { d: 9, t: 'Dia dos Pais', s: 'Campanha de Vendas' }
-            ]},
-            { name: 'Outubro', id: 9, startDay: 4, days: 31, events: [
-                { d: 12, t: 'Dia das Crianças', s: 'Social / Filantropia' },
-                { d: 31, t: 'Halloween', s: 'Engajamento / Reels' }
-            ]},
-            { name: 'Novembro', id: 10, startDay: 0, days: 30, events: [
-                { d: 20, t: 'Consciência Negra', s: 'Educação / Diversidade' },
-                { d: 27, t: 'Black Friday', s: 'Ofertas Agressivas' }
-            ]},
-            { name: 'Dezembro', id: 11, startDay: 2, days: 31, events: [
-                { d: 25, t: 'Natal', s: 'Humanização' },
-                { d: 31, t: 'Réveillon', s: 'Expectativa 2027' }
-            ]}
+            { name: 'Março', id: 2, startDay: 0, days: 31, events: [{ d: 8, t: 'Dia Mulher', s: 'Homenagem' }] },
+            { name: 'Abril', id: 3, startDay: 3, days: 30, events: [{ d: 5, t: 'Páscoa', s: 'Engajamento' }] },
+            { name: 'Maio', id: 4, startDay: 5, days: 31, events: [{ d: 10, t: 'Dia das Mães', s: 'Vendas' }] },
+            { name: 'Junho', id: 5, startDay: 1, days: 30, events: [{ d: 12, t: 'Namorados', s: 'Promoção' }] },
+            { name: 'Agosto', id: 7, startDay: 6, days: 31, events: [{ d: 9, t: 'Dia dos Pais', s: 'Vendas' }] },
+            { name: 'Outubro', id: 9, startDay: 4, days: 31, events: [{ d: 12, t: 'Crianças', s: 'Social' }] },
+            { name: 'Novembro', id: 10, startDay: 0, days: 30, events: [{ d: 27, t: 'Black Friday', s: 'Ofertas' }] },
+            { name: 'Dezembro', id: 11, startDay: 2, days: 31, events: [{ d: 25, t: 'Natal', s: 'Branding' }] }
         ];
 
         let currentEditingIndex = null;
         let selectedDay = null;
+        let user = null;
 
-        // Renderiza a grade principal (Cards)
+        // Path Rule: artifacts/{appId}/public/data/{collectionName}/{docId}
+        const getDocRef = () => doc(db, 'artifacts', appId, 'public', 'data', 'plannerConfigs', 'main');
+
+        // Persist Data to Cloud
+        async function persistToCloud() {
+            if (!user) return;
+            const status = document.getElementById('syncIndicator');
+            const text = document.getElementById('statusText');
+            status.classList.add('syncing');
+            text.innerText = "A gravar na nuvem...";
+
+            try {
+                await setDoc(getDocRef(), { months: monthsData });
+                status.classList.remove('syncing');
+                text.innerText = "Sincronizado com a Nuvem";
+            } catch (e) {
+                console.error("Erro ao gravar:", e);
+                text.innerText = "Erro ao gravar";
+            }
+        }
+
+        // Initialize Auth FIRST (Rule 3)
+        const initApp = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                console.error("Erro na autenticação:", e);
+            }
+        };
+
+        // Listen for Auth changes
+        onAuthStateChanged(auth, (u) => {
+            user = u;
+            if (user) {
+                // Setup Snapshot listener only after auth
+                onSnapshot(getDocRef(), (snapshot) => {
+                    if (snapshot.exists()) {
+                        monthsData = snapshot.data().months;
+                        renderMainGrid();
+                        if (currentEditingIndex !== null) {
+                            renderCalendar(monthsData[currentEditingIndex]);
+                            renderModalEvents(monthsData[currentEditingIndex]);
+                        }
+                    } else {
+                        persistToCloud();
+                    }
+                }, (err) => {
+                    console.error("Erro snapshot:", err);
+                    document.getElementById('statusText').innerText = "Erro de Permissão";
+                });
+            }
+        });
+
+        // UI Rendering
         function renderMainGrid() {
-            const mainGrid = document.getElementById('mainGrid');
-            mainGrid.innerHTML = '';
-            
-            monthsData.forEach((month, index) => {
+            const grid = document.getElementById('mainGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            monthsData.forEach((month, idx) => {
                 const card = document.createElement('div');
                 card.className = 'month-card';
-                card.onclick = () => openMonth(index);
-                
-                month.events.sort((a, b) => a.d - b.d);
-                
-                let eventsHtml = '';
+                card.onclick = () => openMonth(idx);
+                month.events.sort((a,b) => a.d - b.d);
+                let html = `<div class="month-name">${month.name}</div>`;
                 month.events.slice(0, 3).forEach(ev => {
-                    eventsHtml += `
-                        <div class="event-item">
-                            <span class="event-date playfair">${ev.d.toString().padStart(2, '0')}</span>
-                            <span class="event-title">${ev.t}</span>
-                        </div>
-                    `;
+                    html += `<div class="event-item"><span class="event-date playfair">${ev.d.toString().padStart(2, '0')}</span><span class="event-title text-sm">${ev.t}</span></div>`;
                 });
-
-                if (month.events.length > 3) {
-                    eventsHtml += `<div class="text-[10px] text-gray-400 italic mt-2">+ ${month.events.length - 3} itens</div>`;
-                }
-
-                card.innerHTML = `
-                    <div class="month-name">${month.name}</div>
-                    ${eventsHtml || '<p class="text-[10px] italic text-gray-300">Sem eventos</p>'}
-                `;
-                mainGrid.appendChild(card);
+                if (month.events.length > 3) html += `<div class="text-[9px] text-gray-400">+ ${month.events.length - 3} outros</div>`;
+                card.innerHTML = html || `<div class="month-name">${month.name}</div><p class="text-[10px] italic text-gray-300">Sem eventos</p>`;
+                grid.appendChild(card);
             });
         }
 
-        function openMonth(index) {
+        window.openMonth = (index) => {
             currentEditingIndex = index;
             selectedDay = null;
-            const month = monthsData[index];
+            document.getElementById('modalMonthName').innerText = monthsData[index].name;
+            renderCalendar(monthsData[index]);
+            renderModalEvents(monthsData[index]);
             const modal = document.getElementById('monthModal');
-            
-            document.getElementById('modalMonthName').innerText = month.name;
-            
-            renderCalendar(month);
-            renderModalEvents(month);
-
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('active'), 10);
-            
-            document.getElementById('newDay').value = '';
-            document.getElementById('newTitle').value = '';
-            document.getElementById('newStrategy').value = '';
-        }
+            document.querySelectorAll('.input-field').forEach(i => i.value = '');
+        };
 
-        function selectDayInGrid(dayNumber) {
-            selectedDay = dayNumber;
-            document.getElementById('newDay').value = dayNumber;
-            
-            // Re-renderizar calendário para mostrar o destaque
-            renderCalendar(monthsData[currentEditingIndex]);
-        }
-
-        function renderCalendar(month) {
+        window.renderCalendar = (month) => {
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
-            
-            const daysShort = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-            daysShort.forEach(d => {
-                const h = document.createElement('div');
-                h.className = 'calendar-day-header';
-                h.innerText = d;
-                grid.appendChild(h);
+            ['D','S','T','Q','Q','S','S'].forEach(d => {
+                const h = document.createElement('div'); h.className='calendar-day-header'; h.innerText=d; grid.appendChild(h);
             });
-
-            for (let i = 0; i < month.startDay; i++) {
-                grid.appendChild(document.createElement('div'));
-            }
-
+            for (let i = 0; i < month.startDay; i++) grid.appendChild(document.createElement('div'));
             for (let i = 1; i <= month.days; i++) {
                 const day = document.createElement('div');
-                day.className = 'calendar-day';
-                day.innerText = i;
-                
+                day.className = 'calendar-day'; day.innerText = i;
                 if (month.events.find(e => e.d === i)) day.classList.add('event');
                 if (selectedDay === i) day.classList.add('selected');
-                
-                day.onclick = (e) => {
-                    e.stopPropagation();
-                    selectDayInGrid(i);
-                };
-                
+                day.onclick = () => { selectedDay = i; document.getElementById('newDay').value = i; renderCalendar(month); };
                 grid.appendChild(day);
             }
-        }
+        };
 
-        function renderModalEvents(month) {
-            const eventsList = document.getElementById('modalEventsList');
-            let html = '<h4 class="text-xs uppercase tracking-widest text-gray-400 mb-6 border-b border-gray-100 pb-2">Ativações Confirmadas</h4>';
-            
-            month.events.sort((a,b) => a.d - b.d).forEach((ev, evIdx) => {
-                html += `
-                    <div class="flex justify-between items-center group mb-4 pb-4 border-b border-gray-50">
-                        <div class="flex items-start gap-4">
-                            <span class="playfair text-2xl font-bold text-gray-800">${ev.d.toString().padStart(2, '0')}</span>
-                            <div>
-                                <div class="font-bold text-sm">${ev.t}</div>
-                                <div class="strategy-tag">${ev.s}</div>
-                            </div>
-                        </div>
-                        <button onclick="removeEvent(${evIdx})" class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all px-2">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-                `;
+        window.renderModalEvents = (month) => {
+            const list = document.getElementById('modalEventsList');
+            let html = '<h4 class="text-xs uppercase tracking-widest text-gray-400 mb-6 border-b pb-2">Estratégias Planeadas</h4>';
+            month.events.sort((a,b) => a.d - b.d).forEach((ev, idx) => {
+                html += `<div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-50"><div class="flex items-start gap-4"><span class="playfair text-2xl font-bold">${ev.d.toString().padStart(2,'0')}</span><div><div class="font-bold text-sm">${ev.t}</div><div class="strategy-tag">${ev.s}</div></div></div><button onclick="removeEvent(${idx})" class="text-gray-300 hover:text-red-400 px-2"><i class="fa-solid fa-trash-can"></i></button></div>`;
             });
-            eventsList.innerHTML = html || '<p class="text-sm italic text-gray-300">Nenhuma ativação planejada.</p>';
-        }
+            list.innerHTML = html || '<p class="text-sm italic text-gray-300">Nenhuma ação planeada para este mês.</p>';
+        };
 
-        function saveNewEvent() {
-            const day = parseInt(document.getElementById('newDay').value);
-            const title = document.getElementById('newTitle').value;
-            const strategy = document.getElementById('newStrategy').value;
-
-            if (!day || !title || day < 1 || day > 31) {
-                alert("Por favor, selecione um dia e dê um título à data.");
-                return;
-            }
-
-            monthsData[currentEditingIndex].events.push({ d: day, t: title, s: strategy });
-            
-            selectedDay = null; // Reset seleção
+        window.saveNewEvent = async () => {
+            const d = parseInt(document.getElementById('newDay').value);
+            const t = document.getElementById('newTitle').value;
+            const s = document.getElementById('newStrategy').value;
+            if (!d || !t || !user) return;
+            monthsData[currentEditingIndex].events.push({ d, t, s });
+            selectedDay = null;
             renderCalendar(monthsData[currentEditingIndex]);
             renderModalEvents(monthsData[currentEditingIndex]);
             renderMainGrid();
+            persistToCloud();
+            document.querySelectorAll('.input-field').forEach(i => i.value = '');
+        };
 
-            document.getElementById('newDay').value = '';
-            document.getElementById('newTitle').value = '';
-            document.getElementById('newStrategy').value = '';
-        }
-
-        function removeEvent(evIdx) {
-            monthsData[currentEditingIndex].events.splice(evIdx, 1);
+        window.removeEvent = async (idx) => {
+            if (!user) return;
+            monthsData[currentEditingIndex].events.splice(idx, 1);
             renderCalendar(monthsData[currentEditingIndex]);
             renderModalEvents(monthsData[currentEditingIndex]);
             renderMainGrid();
-        }
+            persistToCloud();
+        };
 
-        function closeModal() {
-            const modal = document.getElementById('monthModal');
-            modal.classList.remove('active');
-            setTimeout(() => modal.style.display = 'none', 400);
-        }
+        window.closeModal = () => {
+            document.getElementById('monthModal').classList.remove('active');
+            setTimeout(() => { document.getElementById('monthModal').style.display = 'none'; currentEditingIndex = null; }, 400);
+        };
 
-        window.onclick = function(event) {
-            const modal = document.getElementById('monthModal');
-            if (event.target == modal) closeModal();
-        }
+        window.onclick = (e) => { if (e.target.id === 'monthModal') closeModal(); };
 
-        window.onload = renderMainGrid;
+        // Start App
+        initApp();
+        renderMainGrid();
     </script>
 </body>
 </html>
