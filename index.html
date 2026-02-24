@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner Estratégico 2026 - Versão Final Estável</title>
+    <title>Planner Estratégico 2026 - Versão Global</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -223,7 +223,8 @@
             border: 1px solid var(--border-color);
         }
 
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }
+        .status-dot.online { background: #22c55e; }
         .status-dot.syncing { background: #f97316; animation: pulse 1s infinite; }
 
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
@@ -234,7 +235,7 @@
     <!-- Indicador de Gravação -->
     <div id="saveStatus">
         <div class="status-dot" id="syncIndicator"></div>
-        <span id="statusText">A preparar ligação...</span>
+        <span id="statusText">Modo Offline</span>
     </div>
 
     <div class="presentation-page relative">
@@ -243,7 +244,7 @@
             <h1 class="playfair text-6xl mt-4 text-gray-800 italic leading-tight">Planner de <br>Oportunidades 2026</h1>
             <div class="header-line"></div>
             <p class="max-w-xl text-gray-500 font-light leading-relaxed">
-                As suas alterações são gravadas automaticamente na nuvem. Clique num mês para abrir o calendário detalhado.
+                Organização visual para Instagram e Facebook. Clique num mês para abrir o calendário detalhado.
             </p>
         </header>
 
@@ -277,7 +278,7 @@
                                 <label class="text-[10px] uppercase tracking-wider text-gray-400">Estratégia</label>
                                 <input type="text" id="newStrategy" class="input-field" placeholder="Ex: Campanha Reels">
                             </div>
-                            <button class="btn-gold mt-4" onclick="saveNewEvent()">Adicionar e Gravar</button>
+                            <button class="btn-gold mt-4" onclick="saveNewEvent()">Adicionar à Lista</button>
                         </div>
                     </div>
                 </div>
@@ -290,14 +291,11 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Setup
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // Variáveis de ambiente
+        const hasFirebase = typeof __firebase_config !== 'undefined';
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-planner-2026';
 
-        // Default Data
+        // Dados padrão
         let monthsData = [
             { name: 'Março', id: 2, startDay: 0, days: 31, events: [{ d: 8, t: 'Dia Mulher', s: 'Homenagem' }] },
             { name: 'Abril', id: 3, startDay: 3, days: 30, events: [{ d: 5, t: 'Páscoa', s: 'Engajamento' }] },
@@ -312,65 +310,72 @@
         let currentEditingIndex = null;
         let selectedDay = null;
         let user = null;
+        let db = null;
+        let auth = null;
 
-        // Path Rule: artifacts/{appId}/public/data/{collectionName}/{docId}
-        const getDocRef = () => doc(db, 'artifacts', appId, 'public', 'data', 'plannerConfigs', 'main');
-
-        // Persist Data to Cloud
-        async function persistToCloud() {
-            if (!user) return;
-            const status = document.getElementById('syncIndicator');
-            const text = document.getElementById('statusText');
-            status.classList.add('syncing');
-            text.innerText = "A gravar na nuvem...";
-
-            try {
-                await setDoc(getDocRef(), { months: monthsData });
-                status.classList.remove('syncing');
-                text.innerText = "Sincronizado com a Nuvem";
-            } catch (e) {
-                console.error("Erro ao gravar:", e);
-                text.innerText = "Erro ao gravar";
+        // Inicialização Segura
+        const setupFirebase = async () => {
+            if (!hasFirebase) {
+                console.log("Ambiente externo detectado. Rodando em modo local.");
+                renderMainGrid();
+                return;
             }
-        }
 
-        // Initialize Auth FIRST (Rule 3)
-        const initApp = async () => {
             try {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
+
+                onAuthStateChanged(auth, (u) => {
+                    user = u;
+                    if (user) {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerConfigs', 'main');
+                        onSnapshot(docRef, (snapshot) => {
+                            if (snapshot.exists()) {
+                                monthsData = snapshot.data().months;
+                                renderMainGrid();
+                                updateModalIfOpen();
+                            } else {
+                                persistToCloud();
+                            }
+                        }, (err) => {
+                            console.error("Erro Firebase:", err);
+                            document.getElementById('statusText').innerText = "Erro de Sincronização";
+                            renderMainGrid();
+                        });
+                    }
+                });
             } catch (e) {
-                console.error("Erro na autenticação:", e);
+                console.error("Erro ao configurar Firebase:", e);
+                renderMainGrid();
             }
         };
 
-        // Listen for Auth changes
-        onAuthStateChanged(auth, (u) => {
-            user = u;
-            if (user) {
-                // Setup Snapshot listener only after auth
-                onSnapshot(getDocRef(), (snapshot) => {
-                    if (snapshot.exists()) {
-                        monthsData = snapshot.data().months;
-                        renderMainGrid();
-                        if (currentEditingIndex !== null) {
-                            renderCalendar(monthsData[currentEditingIndex]);
-                            renderModalEvents(monthsData[currentEditingIndex]);
-                        }
-                    } else {
-                        persistToCloud();
-                    }
-                }, (err) => {
-                    console.error("Erro snapshot:", err);
-                    document.getElementById('statusText').innerText = "Erro de Permissão";
-                });
-            }
-        });
+        async function persistToCloud() {
+            if (!user || !db) return;
+            const status = document.getElementById('syncIndicator');
+            const text = document.getElementById('statusText');
+            status.classList.add('syncing');
+            text.innerText = "Sincronizando...";
 
-        // UI Rendering
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerConfigs', 'main');
+                await setDoc(docRef, { months: monthsData });
+                status.classList.remove('syncing');
+                status.classList.add('online');
+                text.innerText = "Sincronizado";
+            } catch (e) {
+                text.innerText = "Erro ao gravar";
+            }
+        }
+
         function renderMainGrid() {
             const grid = document.getElementById('mainGrid');
             if (!grid) return;
@@ -388,6 +393,13 @@
                 card.innerHTML = html || `<div class="month-name">${month.name}</div><p class="text-[10px] italic text-gray-300">Sem eventos</p>`;
                 grid.appendChild(card);
             });
+        }
+
+        function updateModalIfOpen() {
+            if (currentEditingIndex !== null) {
+                renderCalendar(monthsData[currentEditingIndex]);
+                renderModalEvents(monthsData[currentEditingIndex]);
+            }
         }
 
         window.openMonth = (index) => {
@@ -425,14 +437,14 @@
             month.events.sort((a,b) => a.d - b.d).forEach((ev, idx) => {
                 html += `<div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-50"><div class="flex items-start gap-4"><span class="playfair text-2xl font-bold">${ev.d.toString().padStart(2,'0')}</span><div><div class="font-bold text-sm">${ev.t}</div><div class="strategy-tag">${ev.s}</div></div></div><button onclick="removeEvent(${idx})" class="text-gray-300 hover:text-red-400 px-2"><i class="fa-solid fa-trash-can"></i></button></div>`;
             });
-            list.innerHTML = html || '<p class="text-sm italic text-gray-300">Nenhuma ação planeada para este mês.</p>';
+            list.innerHTML = html || '<p class="text-sm italic text-gray-300">Sem ações planeadas.</p>';
         };
 
         window.saveNewEvent = async () => {
             const d = parseInt(document.getElementById('newDay').value);
             const t = document.getElementById('newTitle').value;
             const s = document.getElementById('newStrategy').value;
-            if (!d || !t || !user) return;
+            if (!d || !t) return;
             monthsData[currentEditingIndex].events.push({ d, t, s });
             selectedDay = null;
             renderCalendar(monthsData[currentEditingIndex]);
@@ -443,7 +455,6 @@
         };
 
         window.removeEvent = async (idx) => {
-            if (!user) return;
             monthsData[currentEditingIndex].events.splice(idx, 1);
             renderCalendar(monthsData[currentEditingIndex]);
             renderModalEvents(monthsData[currentEditingIndex]);
@@ -458,9 +469,7 @@
 
         window.onclick = (e) => { if (e.target.id === 'monthModal') closeModal(); };
 
-        // Start App
-        initApp();
-        renderMainGrid();
+        setupFirebase();
     </script>
 </body>
 </html>
