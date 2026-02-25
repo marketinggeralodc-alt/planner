@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner Estratégico 2026 - Versão Global</title>
+    <title>Planner Estratégico 2026 - IA & Cloud Conectado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +16,7 @@
             --accent-gold: #c5a059;
             --soft-gray: #f4f1ee;
             --border-color: #e5e1dc;
+            --ai-purple: #8b5cf6;
         }
 
         body {
@@ -126,9 +127,9 @@
         .modal-content {
             background: var(--bg-neutral);
             width: 95%;
-            max-width: 1000px;
+            max-width: 1100px;
             max-height: 90vh;
-            padding: 50px;
+            padding: 40px;
             border-radius: 2px;
             position: relative;
             transform: translateY(20px);
@@ -142,8 +143,8 @@
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            margin-top: 30px;
+            gap: 8px;
+            margin-top: 20px;
         }
 
         .calendar-day-header {
@@ -174,11 +175,11 @@
         .calendar-day.event { background: var(--soft-gray); color: var(--text-main); font-weight: 700; }
         .calendar-day.event::after { content: ''; position: absolute; bottom: 4px; width: 4px; height: 4px; background: var(--accent-gold); border-radius: 50%; }
 
-        /* EDITOR */
+        /* EDITOR & AI */
         .editor-section {
             background: #fdfcfb;
             border: 1px solid var(--border-color);
-            padding: 30px;
+            padding: 25px;
             border-radius: 4px;
         }
 
@@ -189,14 +190,14 @@
             border-bottom: 1px solid var(--border-color);
             padding: 8px 0;
             font-size: 14px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             outline: none;
         }
 
         .btn-gold {
             background: var(--accent-gold);
             color: white;
-            padding: 12px 30px;
+            padding: 10px 20px;
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -204,6 +205,42 @@
             cursor: pointer;
             width: 100%;
             font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .btn-ai {
+            background: var(--ai-purple);
+            color: white;
+            padding: 10px 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .btn-ai:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .ai-response {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f3ff;
+            border: 1px solid #ddd6fe;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #4c1d95;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
         }
 
         /* STATUS INDICATOR */
@@ -232,19 +269,18 @@
 </head>
 <body>
 
-    <!-- Indicador de Gravação -->
     <div id="saveStatus">
         <div class="status-dot" id="syncIndicator"></div>
-        <span id="statusText">Modo Offline</span>
+        <span id="statusText">A ligar ao Firebase...</span>
     </div>
 
     <div class="presentation-page relative">
         <header class="relative z-10 mb-12">
-            <span class="text-xs uppercase tracking-[5px] text-gray-400">Planeamento Estratégico</span>
-            <h1 class="playfair text-6xl mt-4 text-gray-800 italic leading-tight">Planner de <br>Oportunidades 2026</h1>
+            <span class="text-xs uppercase tracking-[5px] text-gray-400">Estratégia Regional // 2026</span>
+            <h1 class="playfair text-6xl mt-4 text-gray-800 italic leading-tight">Planner <br>Inteligente Meta</h1>
             <div class="header-line"></div>
             <p class="max-w-xl text-gray-500 font-light leading-relaxed">
-                Organização visual para Instagram e Facebook. Clique num mês para abrir o calendário detalhado.
+                As suas alterações são gravadas no seu Firestore e as estratégias são otimizadas via Gemini AI.
             </p>
         </header>
 
@@ -255,31 +291,46 @@
     <div id="monthModal">
         <div class="modal-content">
             <div class="close-modal" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Coluna 1: Calendário -->
                 <div>
                     <span class="month-name" id="modalMonthName">Janeiro</span>
-                    <h2 class="playfair text-4xl mt-2 mb-6 italic">Visão Mensal</h2>
+                    <h2 class="playfair text-3xl mt-1 mb-4 italic">Calendário</h2>
                     <div class="calendar-grid" id="calendarGrid"></div>
-                    <div class="mt-10" id="modalEventsList"></div>
+                    <div class="mt-8" id="modalEventsList"></div>
                 </div>
-                <div class="flex flex-col justify-center">
+
+                <!-- Coluna 2: Planeamento Humano -->
+                <div>
                     <div class="editor-section">
-                        <h3 class="playfair text-3xl mb-8 italic text-gray-700 text-center">Planear Ação</h3>
-                        <div class="space-y-4">
+                        <h3 class="playfair text-2xl mb-6 italic text-gray-700">Novo Evento</h3>
+                        <div class="space-y-3">
                             <div>
-                                <label class="text-[10px] uppercase tracking-wider text-gray-400">Dia Selecionado</label>
+                                <label class="text-[10px] uppercase text-gray-400">Dia</label>
                                 <input type="number" id="newDay" class="input-field" readonly>
                             </div>
                             <div>
-                                <label class="text-[10px] uppercase tracking-wider text-gray-400">Título do Evento</label>
-                                <input type="text" id="newTitle" class="input-field" placeholder="Ex: Black Friday">
+                                <label class="text-[10px] uppercase text-gray-400">Título</label>
+                                <input type="text" id="newTitle" class="input-field" placeholder="Ex: Promoção de Verão">
                             </div>
                             <div>
-                                <label class="text-[10px] uppercase tracking-wider text-gray-400">Estratégia</label>
-                                <input type="text" id="newStrategy" class="input-field" placeholder="Ex: Campanha Reels">
+                                <label class="text-[10px] uppercase text-gray-400">Estratégia</label>
+                                <input type="text" id="newStrategy" class="input-field" placeholder="Ex: Stories + Reels">
                             </div>
-                            <button class="btn-gold mt-4" onclick="saveNewEvent()">Adicionar à Lista</button>
+                            <button class="btn-gold" onclick="saveNewEvent()">Gravar Alteração</button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Coluna 3: Inteligência Artificial -->
+                <div>
+                    <div class="editor-section border-purple-100 bg-purple-50/30">
+                        <h3 class="playfair text-2xl mb-4 italic text-purple-800">Consultoria IA ✨</h3>
+                        <p class="text-[11px] text-purple-600 mb-4">Gere sugestões de posts e legendas para os eventos planeados deste mês.</p>
+                        <button id="btnAi" class="btn-ai" onclick="consultAI()">
+                            <i class="fa-solid fa-sparkles"></i> Gerar Estratégia
+                        </button>
+                        <div id="aiResponse" class="ai-response"></div>
                     </div>
                 </div>
             </div>
@@ -291,11 +342,22 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Variáveis de ambiente
-        const hasFirebase = typeof __firebase_config !== 'undefined';
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-planner-2026';
+        // CONFIGURAÇÃO FIREBASE DO UTILIZADOR
+        const myManualConfig = {
+            apiKey: "AIzaSyD2J_7fWhX3mXyuszPk9ksPoyjgLjhknEI",
+            authDomain: "planner-4ad1e.firebaseapp.com",
+            projectId: "planner-4ad1e",
+            storageBucket: "planner-4ad1e.firebasestorage.app",
+            messagingSenderId: "487956848188",
+            appId: "1:487956848188:web:4af717d7b1200ab4c72d39"
+        };
 
-        // Dados padrão
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : myManualConfig;
+        const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'planner-4ad1e';
+        const apiKey = ""; // Gemini API Key (fornecida pelo ambiente)
+
+        // Dados base (Fallback)
         let monthsData = [
             { name: 'Março', id: 2, startDay: 0, days: 31, events: [{ d: 8, t: 'Dia Mulher', s: 'Homenagem' }] },
             { name: 'Abril', id: 3, startDay: 3, days: 30, events: [{ d: 5, t: 'Páscoa', s: 'Engajamento' }] },
@@ -304,7 +366,7 @@
             { name: 'Agosto', id: 7, startDay: 6, days: 31, events: [{ d: 9, t: 'Dia dos Pais', s: 'Vendas' }] },
             { name: 'Outubro', id: 9, startDay: 4, days: 31, events: [{ d: 12, t: 'Crianças', s: 'Social' }] },
             { name: 'Novembro', id: 10, startDay: 0, days: 30, events: [{ d: 27, t: 'Black Friday', s: 'Ofertas' }] },
-            { name: 'Dezembro', id: 11, startDay: 2, days: 31, events: [{ d: 25, t: 'Natal', s: 'Branding' }] }
+            { name: 'Dezembro', id: 11, startDay: 2, days: 31, events: [{ d: 25, t: 'Natal', s: 'Humanização' }] }
         ];
 
         let currentEditingIndex = null;
@@ -313,22 +375,15 @@
         let db = null;
         let auth = null;
 
-        // Inicialização Segura
-        const setupFirebase = async () => {
-            if (!hasFirebase) {
-                console.log("Ambiente externo detectado. Rodando em modo local.");
-                renderMainGrid();
-                return;
-            }
-
+        // INICIALIZAÇÃO FIREBASE (Regra 3: Auth antes de queries)
+        const initFirebase = async () => {
             try {
-                const firebaseConfig = JSON.parse(__firebase_config);
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
+                if (initialToken) {
+                    await signInWithCustomToken(auth, initialToken);
                 } else {
                     await signInAnonymously(auth);
                 }
@@ -336,24 +391,28 @@
                 onAuthStateChanged(auth, (u) => {
                     user = u;
                     if (user) {
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerConfigs', 'main');
+                        // Caminho estrito (Regra 1): /artifacts/{appId}/public/data/{collectionName}/{docId}
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerData', 'mainDoc');
+                        
                         onSnapshot(docRef, (snapshot) => {
                             if (snapshot.exists()) {
                                 monthsData = snapshot.data().months;
                                 renderMainGrid();
-                                updateModalIfOpen();
+                                if (currentEditingIndex !== null) {
+                                    renderCalendar(monthsData[currentEditingIndex]);
+                                    renderModalEvents(monthsData[currentEditingIndex]);
+                                }
                             } else {
                                 persistToCloud();
                             }
                         }, (err) => {
-                            console.error("Erro Firebase:", err);
-                            document.getElementById('statusText').innerText = "Erro de Sincronização";
-                            renderMainGrid();
+                            console.error("Erro snapshot:", err);
+                            document.getElementById('statusText').innerText = "Erro de Ligação";
                         });
                     }
                 });
-            } catch (e) {
-                console.error("Erro ao configurar Firebase:", e);
+            } catch (error) {
+                console.error("Erro Firebase:", error);
                 renderMainGrid();
             }
         };
@@ -363,19 +422,73 @@
             const status = document.getElementById('syncIndicator');
             const text = document.getElementById('statusText');
             status.classList.add('syncing');
-            text.innerText = "Sincronizando...";
-
+            text.innerText = "A gravar...";
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerConfigs', 'main');
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerData', 'mainDoc');
                 await setDoc(docRef, { months: monthsData });
-                status.classList.remove('syncing');
-                status.classList.add('online');
+                status.classList.remove('syncing'); status.classList.add('online');
                 text.innerText = "Sincronizado";
-            } catch (e) {
-                text.innerText = "Erro ao gravar";
+            } catch (e) { 
+                console.error("Erro ao gravar:", e);
+                text.innerText = "Erro ao gravar"; 
             }
         }
 
+        // FUNÇÃO IA (GEMINI API)
+        window.consultAI = async () => {
+            const btn = document.getElementById('btnAi');
+            const responseDiv = document.getElementById('aiResponse');
+            const month = monthsData[currentEditingIndex];
+            
+            if (!month.events.length) {
+                responseDiv.innerHTML = "Por favor, adicione pelo menos um evento ao calendário primeiro.";
+                responseDiv.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> A processar...';
+            responseDiv.style.display = 'block';
+            responseDiv.innerHTML = "A IA está a gerar a sua estratégia...";
+
+            const eventsStr = month.events.map(e => `${e.d}: ${e.t} (${e.s})`).join(', ');
+            const prompt = `Atue como um consultor sênior de marketing digital. Para o mês de ${month.name} de 2026, com os eventos: ${eventsStr}. 
+            Sugira 3 ideias de conteúdo (Reels/Carrossel), 1 legenda de alta performance (máximo 99 caracteres) e 1 prompt visual para IA de imagem. 
+            Mantenha o tom profissional e sofisticado.`;
+
+            let retries = 0;
+            const maxRetries = 5;
+            const callGemini = async (delay) => {
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const data = await res.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text;
+                } catch (err) {
+                    if (retries < maxRetries) {
+                        retries++;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return callGemini(delay * 2);
+                    }
+                    throw err;
+                }
+            };
+
+            try {
+                const resultText = await callGemini(1000);
+                responseDiv.innerHTML = resultText ? resultText.replace(/\n/g, '<br>') : "Erro na resposta da IA.";
+            } catch (e) {
+                responseDiv.innerHTML = "Erro ao conectar com a Inteligência Artificial.";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-sparkles"></i> Gerar Estratégia';
+            }
+        };
+
+        // UI LOGIC
         function renderMainGrid() {
             const grid = document.getElementById('mainGrid');
             if (!grid) return;
@@ -387,19 +500,12 @@
                 month.events.sort((a,b) => a.d - b.d);
                 let html = `<div class="month-name">${month.name}</div>`;
                 month.events.slice(0, 3).forEach(ev => {
-                    html += `<div class="event-item"><span class="event-date playfair">${ev.d.toString().padStart(2, '0')}</span><span class="event-title text-sm">${ev.t}</span></div>`;
+                    html += `<div class="event-item"><span class="event-date playfair">${ev.d.toString().padStart(2,'0')}</span><span class="event-title text-sm">${ev.t}</span></div>`;
                 });
-                if (month.events.length > 3) html += `<div class="text-[9px] text-gray-400">+ ${month.events.length - 3} outros</div>`;
-                card.innerHTML = html || `<div class="month-name">${month.name}</div><p class="text-[10px] italic text-gray-300">Sem eventos</p>`;
+                if (month.events.length > 3) html += `<div class="text-[9px] text-gray-400">+ ${month.events.length - 3} itens</div>`;
+                card.innerHTML = html;
                 grid.appendChild(card);
             });
-        }
-
-        function updateModalIfOpen() {
-            if (currentEditingIndex !== null) {
-                renderCalendar(monthsData[currentEditingIndex]);
-                renderModalEvents(monthsData[currentEditingIndex]);
-            }
         }
 
         window.openMonth = (index) => {
@@ -408,10 +514,10 @@
             document.getElementById('modalMonthName').innerText = monthsData[index].name;
             renderCalendar(monthsData[index]);
             renderModalEvents(monthsData[index]);
+            document.getElementById('aiResponse').style.display = 'none';
             const modal = document.getElementById('monthModal');
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('active'), 10);
-            document.querySelectorAll('.input-field').forEach(i => i.value = '');
         };
 
         window.renderCalendar = (month) => {
@@ -433,11 +539,17 @@
 
         window.renderModalEvents = (month) => {
             const list = document.getElementById('modalEventsList');
-            let html = '<h4 class="text-xs uppercase tracking-widest text-gray-400 mb-6 border-b pb-2">Estratégias Planeadas</h4>';
+            let html = '<h4 class="text-xs uppercase tracking-widest text-gray-400 mb-4 border-b pb-2">Ativações</h4>';
             month.events.sort((a,b) => a.d - b.d).forEach((ev, idx) => {
-                html += `<div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-50"><div class="flex items-start gap-4"><span class="playfair text-2xl font-bold">${ev.d.toString().padStart(2,'0')}</span><div><div class="font-bold text-sm">${ev.t}</div><div class="strategy-tag">${ev.s}</div></div></div><button onclick="removeEvent(${idx})" class="text-gray-300 hover:text-red-400 px-2"><i class="fa-solid fa-trash-can"></i></button></div>`;
+                html += `<div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-50 text-xs">
+                    <div class="flex items-start gap-3">
+                        <span class="playfair font-bold">${ev.d.toString().padStart(2,'0')}</span>
+                        <div><strong>${ev.t}</strong><br><span class="text-[10px] text-gray-400 uppercase">${ev.s}</span></div>
+                    </div>
+                    <button onclick="removeEvent(${idx})" class="text-gray-300 hover:text-red-400 px-2"><i class="fa-solid fa-trash-can"></i></button>
+                </div>`;
             });
-            list.innerHTML = html || '<p class="text-sm italic text-gray-300">Sem ações planeadas.</p>';
+            list.innerHTML = html || '<p class="text-[11px] italic text-gray-300">Nenhuma ação.</p>';
         };
 
         window.saveNewEvent = async () => {
@@ -446,12 +558,11 @@
             const s = document.getElementById('newStrategy').value;
             if (!d || !t) return;
             monthsData[currentEditingIndex].events.push({ d, t, s });
-            selectedDay = null;
             renderCalendar(monthsData[currentEditingIndex]);
             renderModalEvents(monthsData[currentEditingIndex]);
             renderMainGrid();
             persistToCloud();
-            document.querySelectorAll('.input-field').forEach(i => i.value = '');
+            document.getElementById('newTitle').value = ''; document.getElementById('newStrategy').value = '';
         };
 
         window.removeEvent = async (idx) => {
@@ -469,7 +580,7 @@
 
         window.onclick = (e) => { if (e.target.id === 'monthModal') closeModal(); };
 
-        setupFirebase();
+        initFirebase();
     </script>
 </body>
 </html>
