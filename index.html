@@ -245,7 +245,7 @@
 
     <div id="saveStatus">
         <div class="status-dot" id="syncIndicator"></div>
-        <span id="statusText">A carregar...</span>
+        <span id="statusText">Carregando dados...</span>
     </div>
 
     <div class="presentation-page relative">
@@ -328,10 +328,10 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIGURAÇÃO OFICIAL DO TEU FIREBASE
+        // CONFIGURAÇÃO OFICIAL
         const firebaseConfig = {
             apiKey: "AIzaSyDoiKeXB6Ifi4ES2kRaT8RSZz-iu3sU7KE",
             authDomain: "plannerr-76af0.firebaseapp.com",
@@ -342,7 +342,7 @@
             measurementId: "G-3Z9751F490"
         };
 
-        // Dados padrão para mostrar imediatamente (Zero Atraso Visual)
+        // Dados base
         let monthsData = [
             { name: 'Janeiro', id: 0, startDay: 4, days: 31, items: [] },
             { name: 'Fevereiro', id: 1, startDay: 0, days: 28, items: [] },
@@ -360,85 +360,85 @@
 
         let currentEditingIndex = null;
         let selectedDay = null;
-        let user = null;
         let db = null;
-        let auth = null;
 
-        // Renderiza imediatamente para que não haja tela em branco
-        renderMainGrid();
+        // 1. CARREGAMENTO ULTRA RÁPIDO: Tenta buscar dados salvos no navegador primeiro
+        const localBackup = localStorage.getItem('planner2026_backup');
+        if (localBackup) {
+            monthsData = JSON.parse(localBackup);
+        }
+        renderMainGrid(); // Mostra a tela na hora!
 
+        // 2. CONEXÃO FIREBASE SIMPLIFICADA
         const initFirebase = async () => {
             try {
                 const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
                 db = getFirestore(app);
+                const auth = getAuth(app);
 
-                // Removida a tentativa de usar o Token do Canvas. Agora ele conecta direto
-                // ao TEU projeto como utilizador anónimo. O atraso desaparece aqui.
-                try {
-                    await signInAnonymously(auth);
-                } catch (authError) {
-                    console.error("Erro no Auth:", authError);
-                    document.getElementById('statusText').innerText = "Ative 'Login Anónimo' no Firebase";
-                    document.getElementById('syncIndicator').classList.add('offline');
-                    return;
-                }
+                // Tenta conectar, mas não trava o sistema se der erro
+                signInAnonymously(auth).catch(() => console.log("Acesso anônimo falhou, mas regras estão abertas."));
 
-                onAuthStateChanged(auth, (u) => {
-                    user = u;
-                    if (user) {
-                        document.getElementById('statusText').innerText = "Ligado à Nuvem";
-                        document.getElementById('syncIndicator').classList.add('online');
+                // Caminho super simples: pasta 'sistema_clinica', arquivo 'planner_2026'
+                const docRef = doc(db, 'sistema_clinica', 'planner_2026');
+                
+                onSnapshot(docRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        monthsData = snapshot.data().months;
+                        // Atualiza o backup local
+                        localStorage.setItem('planner2026_backup', JSON.stringify(monthsData));
                         
-                        // CAMINHO SIMPLIFICADO: Mais fácil de encontrares no teu Firebase Console
-                        // Vai aparecer uma pasta "planner" e um documento "dados2026"
-                        const docRef = doc(db, 'planner', 'dados2026');
-                        
-                        onSnapshot(docRef, (snapshot) => {
-                            if (snapshot.exists()) {
-                                monthsData = snapshot.data().months;
-                                renderMainGrid();
-                                if (currentEditingIndex !== null) renderModalContent(monthsData[currentEditingIndex]);
-                            } else { 
-                                // Cria o documento na primeira vez que liga
-                                persistToCloud(); 
-                            }
-                        }, (err) => {
-                            console.error("Erro de Leitura Firestore:", err);
-                            document.getElementById('statusText').innerText = "Acesso Negado (Verifique Regras)";
-                            document.getElementById('syncIndicator').classList.replace('online', 'offline');
-                        });
+                        renderMainGrid();
+                        if (currentEditingIndex !== null) renderModalContent(monthsData[currentEditingIndex]);
+                    } else {
+                        // Se não existe lá no Firebase, cria agora
+                        persistToCloud();
                     }
+                    
+                    document.getElementById('statusText').innerText = "Ligado e Sincronizado";
+                    document.getElementById('syncIndicator').classList.add('online');
+                    document.getElementById('syncIndicator').classList.remove('offline');
+                }, (err) => {
+                    console.error("Aviso Firestore:", err);
+                    document.getElementById('statusText').innerText = "Modo Local (Backup)";
                 });
+
             } catch (error) { 
-                console.error("Erro crítico:", error);
-                document.getElementById('statusText').innerText = "Erro Crítico";
+                console.error("Erro Firebase:", error);
+                document.getElementById('statusText').innerText = "Modo Local";
             }
         };
 
+        // 3. FUNÇÃO DE SALVAR FORTE
         async function persistToCloud() {
-            if (!user || !db) return;
+            // Passo 1: Salva no navegador IMEDIATAMENTE (nunca perde)
+            localStorage.setItem('planner2026_backup', JSON.stringify(monthsData));
+
+            // Passo 2: Manda para o Firebase
+            if (!db) return; 
+            
             const status = document.getElementById('syncIndicator');
             const text = document.getElementById('statusText');
             status.classList.remove('online');
             status.classList.add('syncing'); 
-            text.innerText = "A sincronizar...";
+            text.innerText = "Enviando para nuvem...";
             
             try {
-                // Salva os dados no caminho simplificado
-                const docRef = doc(db, 'planner', 'dados2026');
+                const docRef = doc(db, 'sistema_clinica', 'planner_2026');
+                // Salva forçado! (Funciona graças as suas regras abertas)
                 await setDoc(docRef, { months: monthsData });
                 
                 status.classList.remove('syncing'); 
                 status.classList.add('online');
                 text.innerText = "Sincronizado";
             } catch (e) { 
-                console.error("Erro a Gravar:", e);
-                text.innerText = "Erro ao Gravar"; 
+                console.error("Erro a Gravar no Firebase:", e);
+                text.innerText = "Salvo apenas no PC"; 
+                status.classList.remove('syncing'); 
             }
         }
 
-        // Funções de Interface Visual (Inalteradas)
+        // Funções de Interface Visual
         function renderMainGrid() {
             const grid = document.getElementById('mainGrid');
             if (!grid) return;
@@ -545,7 +545,9 @@
             
             renderModalContent(monthsData[currentEditingIndex]);
             renderMainGrid();
-            if (user) persistToCloud();
+            
+            // Força o salvamento
+            await persistToCloud();
             document.getElementById('newTitle').value = '';
         };
 
@@ -553,7 +555,7 @@
             monthsData[currentEditingIndex].items.splice(idx, 1);
             renderModalContent(monthsData[currentEditingIndex]);
             renderMainGrid();
-            if (user) persistToCloud();
+            await persistToCloud();
         };
 
         window.closeModal = () => {
@@ -561,7 +563,7 @@
             setTimeout(() => { document.getElementById('monthModal').style.display = 'none'; currentEditingIndex = null; }, 400);
         };
 
-        // Inicia
+        // Inicia o processo
         initFirebase();
     </script>
 </body>
