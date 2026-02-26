@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner Estratégico 2026 - Gestão Clínica Profissional</title>
+    <title>Planner Estratégico 2026 - Gestão Clínica Total</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,7 +63,7 @@
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             cursor: pointer;
             position: relative;
-            min-height: 220px;
+            min-height: 250px;
             display: flex;
             flex-direction: column;
         }
@@ -85,7 +85,6 @@
             padding-bottom: 10px;
         }
 
-        /* DASHBOARD ITEM STYLES */
         .dash-item {
             display: flex;
             align-items: center;
@@ -117,7 +116,6 @@
         .dot-comemorativa { background: var(--comemorativa-bg); }
         .dot-postagem { background: #cbd5e1; }
 
-        /* MODAL */
         #monthModal {
             position: fixed;
             inset: 0;
@@ -238,6 +236,7 @@
 
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }
         .status-dot.online { background: #22c55e; }
+        .status-dot.offline { background: #ef4444; }
         .status-dot.syncing { background: #f97316; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
@@ -246,7 +245,7 @@
 
     <div id="saveStatus">
         <div class="status-dot" id="syncIndicator"></div>
-        <span id="statusText">A preparar...</span>
+        <span id="statusText">A ligar à nuvem...</span>
     </div>
 
     <div class="presentation-page relative">
@@ -270,7 +269,6 @@
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                <!-- Coluna 1: Calendário -->
                 <div class="lg:col-span-4">
                     <span class="month-name" id="modalMonthName">Janeiro</span>
                     <h2 class="playfair text-3xl mt-1 mb-4 italic">Calendário</h2>
@@ -302,7 +300,6 @@
                     </div>
                 </div>
 
-                <!-- Coluna 2: Listas Detalhadas -->
                 <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="editor-section border-t-4 border-slate-800">
                         <h3 class="playfair text-xl mb-4 font-bold flex items-center">
@@ -334,32 +331,33 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // CONFIGURAÇÃO FIREBASE DO UTILIZADOR (plannerr-76af0)
         const firebaseConfig = {
-            apiKey: "AIzaSyD2J_7fWhX3mXyuszPk9ksPoyjgLjhknEI",
-            authDomain: "planner-4ad1e.firebaseapp.com",
-            projectId: "planner-4ad1e",
-            storageBucket: "planner-4ad1e.firebasestorage.app",
-            messagingSenderId: "487956848188",
-            appId: "1:487956848188:web:4af717d7b1200ab4c72d39"
+            apiKey: "AIzaSyDoiKeXB6Ifi4ES2kRaT8RSZz-iu3sU7KE",
+            authDomain: "plannerr-76af0.firebaseapp.com",
+            projectId: "plannerr-76af0",
+            storageBucket: "plannerr-76af0.firebasestorage.app",
+            messagingSenderId: "642118294614",
+            appId: "1:642118294614:web:cf6677f9b284040ad0eff7",
+            measurementId: "G-3Z9751F490"
         };
 
         const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'planner-4ad1e';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'plannerr-76af0';
 
-        // Dados Iniciais Exemplo para demonstração do visual "clean"
         let monthsData = [
-            { name: 'Janeiro', id: 0, startDay: 4, days: 31, items: [{d: 15, t: 'Aniversário Clínica', cat: 'Comemorativa'}, {d: 20, t: 'Meta Faturamento 100k', cat: 'Campanha'}] },
-            { name: 'Fevereiro', id: 1, startDay: 0, days: 28, items: [{d: 12, t: 'Campanha Botox Day', cat: 'Campanha'}] },
+            { name: 'Janeiro', id: 0, startDay: 4, days: 31, items: [] },
+            { name: 'Fevereiro', id: 1, startDay: 0, days: 28, items: [] },
             { name: 'Março', id: 2, startDay: 0, days: 31, items: [] },
             { name: 'Abril', id: 3, startDay: 3, days: 30, items: [] },
-            { name: 'Maio', id: 4, startDay: 5, days: 31, items: [{d: 10, t: 'Campanha Mães', cat: 'Campanha'}] },
+            { name: 'Maio', id: 4, startDay: 5, days: 31, items: [] },
             { name: 'Junho', id: 5, startDay: 1, days: 30, items: [] },
             { name: 'Julho', id: 6, startDay: 3, days: 31, items: [] },
             { name: 'Agosto', id: 7, startDay: 6, days: 31, items: [] },
             { name: 'Setembro', id: 8, startDay: 2, days: 30, items: [] },
-            { name: 'Outubro', id: 9, startDay: 4, days: 31, items: [{d: 15, t: 'Outubro Rosa Clínica', cat: 'Comemorativa'}] },
-            { name: 'Novembro', id: 10, startDay: 0, days: 30, items: [{d: 27, t: 'Black Friday Metas', cat: 'Campanha'}] },
-            { name: 'Dezembro', id: 11, startDay: 2, days: 31, items: [{d: 25, t: 'Natal Clínica', cat: 'Comemorativa'}] }
+            { name: 'Outubro', id: 9, startDay: 4, days: 31, items: [] },
+            { name: 'Novembro', id: 10, startDay: 0, days: 30, items: [] },
+            { name: 'Dezembro', id: 11, startDay: 2, days: 31, items: [] }
         ];
 
         let currentEditingIndex = null;
@@ -377,13 +375,24 @@
 
                 const performAuth = async () => {
                     try {
-                        if (initialToken && initialToken !== "") {
-                            await signInWithCustomToken(auth, initialToken);
+                        if (initialToken && initialToken !== "" && initialToken !== "null") {
+                            try {
+                                await signInWithCustomToken(auth, initialToken);
+                            } catch (tokenError) {
+                                console.warn("Token incompatível com o novo projeto. A fazer fallback para login anónimo...", tokenError);
+                                await signInAnonymously(auth);
+                            }
                         } else {
                             await signInAnonymously(auth);
                         }
                     } catch (e) {
-                        document.getElementById('statusText').innerText = "Modo Local";
+                        console.error("Auth Error:", e);
+                        if (e.code === 'auth/configuration-not-found' || e.code === 'auth/operation-not-allowed') {
+                            document.getElementById('statusText').innerText = "Ative 'Login Anónimo' no Console";
+                            document.getElementById('syncIndicator').classList.add('offline');
+                        } else {
+                            document.getElementById('statusText').innerText = "Modo Offline";
+                        }
                         renderMainGrid();
                         return null;
                     }
@@ -394,21 +403,30 @@
                 onAuthStateChanged(auth, (u) => {
                     user = u;
                     if (user) {
-                        document.getElementById('statusText').innerText = "Ligado";
+                        document.getElementById('statusText').innerText = "Ligado à Nuvem";
                         document.getElementById('syncIndicator').classList.add('online');
+                        
+                        // REGRA 1: Caminho estrito de documentos
                         const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerData', 'mainDoc');
+                        
                         onSnapshot(docRef, (snapshot) => {
                             if (snapshot.exists()) {
                                 monthsData = snapshot.data().months;
                                 renderMainGrid();
                                 if (currentEditingIndex !== null) renderModalContent(monthsData[currentEditingIndex]);
-                            } else { persistToCloud(); }
+                            } else { 
+                                persistToCloud(); 
+                            }
+                        }, (err) => {
+                            console.error("Firestore error:", err);
+                            document.getElementById('statusText').innerText = "Erro de Sincronização";
                         });
                     }
                 });
             } catch (error) { 
+                console.error("Critical Init Error:", error);
                 renderMainGrid(); 
-                document.getElementById('statusText').innerText = "Erro Local";
+                document.getElementById('statusText').innerText = "Erro de Configuração";
             }
         };
 
@@ -418,14 +436,17 @@
             const text = document.getElementById('statusText');
             status.classList.remove('online');
             status.classList.add('syncing'); 
-            text.innerText = "A gravar...";
+            text.innerText = "A sincronizar...";
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerData', 'mainDoc');
                 await setDoc(docRef, { months: monthsData });
                 status.classList.remove('syncing'); 
                 status.classList.add('online');
                 text.innerText = "Sincronizado";
-            } catch (e) { text.innerText = "Erro Gravação"; }
+            } catch (e) { 
+                console.error("Save Error:", e);
+                text.innerText = "Erro ao Gravar"; 
+            }
         }
 
         function renderMainGrid() {
@@ -437,11 +458,10 @@
                 card.className = 'month-card';
                 card.onclick = () => openMonth(idx);
                 
-                // Prioriza Campanhas e Comemorações para o dashboard
-                const priorityItems = month.items
+                const priorityItems = (month.items || [])
                     .filter(i => i.cat === 'Campanha' || i.cat === 'Comemorativa')
                     .sort((a,b) => a.d - b.d)
-                    .slice(0, 4); // Mostra até 4 itens
+                    .slice(0, 5); 
                 
                 let listHtml = '';
                 priorityItems.forEach(item => {
@@ -456,7 +476,7 @@
                 });
 
                 if (priorityItems.length === 0) {
-                    listHtml = '<p class="text-[10px] text-gray-300 italic mt-4">Nenhuma campanha prioritária.</p>';
+                    listHtml = '<p class="text-[10px] text-gray-300 italic mt-4">Sem eventos estratégicos.</p>';
                 }
 
                 card.innerHTML = `
@@ -484,7 +504,8 @@
             const listComemorativas = document.getElementById('listComemorativas');
             listPostagens.innerHTML = ''; listCampanhas.innerHTML = ''; listComemorativas.innerHTML = '';
             
-            month.items.sort((a,b) => a.d - b.d).forEach((item, idx) => {
+            const items = month.items || [];
+            items.sort((a,b) => a.d - b.d).forEach((item, idx) => {
                 const itemHtml = `
                     <div class="flex justify-between items-center bg-gray-50 p-2 rounded group">
                         <div class="text-xs">
@@ -500,9 +521,9 @@
                 else if (item.cat === 'Comemorativa') listComemorativas.innerHTML += itemHtml;
             });
 
-            if (!listPostagens.innerHTML) listPostagens.innerHTML = '<p class="text-[10px] text-gray-300 italic">Sem tarefas.</p>';
-            if (!listCampanhas.innerHTML) listCampanhas.innerHTML = '<p class="text-[10px] text-gray-300 italic">Sem campanhas.</p>';
-            if (!listComemorativas.innerHTML) listComemorativas.innerHTML = '<p class="text-[10px] text-gray-300 italic">Sem datas especiais.</p>';
+            if (!listPostagens.innerHTML) listPostagens.innerHTML = '<p class="text-[10px] text-gray-300 italic">Sem conteúdo.</p>';
+            if (!listCampanhas.innerHTML) listCampanhas.innerHTML = '<p class="text-[10px] text-gray-300 italic">Sem metas.</p>';
+            if (!listComemorativas.innerHTML) listComemorativas.innerHTML = '<p class="text-[10px] text-gray-300 italic">Sem aniversários.</p>';
         }
 
         window.renderCalendar = (month) => {
@@ -515,7 +536,8 @@
             for (let i = 1; i <= month.days; i++) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day'; day.innerText = i;
-                if (month.items.find(item => item.d === i)) day.classList.add('has-event');
+                const items = month.items || [];
+                if (items.find(item => item.d === i)) day.classList.add('has-event');
                 if (selectedDay === i) day.classList.add('selected');
                 day.onclick = () => { selectedDay = i; document.getElementById('newDay').value = i; renderCalendar(month); };
                 grid.appendChild(day);
@@ -527,6 +549,8 @@
             const t = document.getElementById('newTitle').value;
             const cat = document.getElementById('newItemCategory').value;
             if (!d || !t) return;
+            
+            if (!monthsData[currentEditingIndex].items) monthsData[currentEditingIndex].items = [];
             monthsData[currentEditingIndex].items.push({ d, t, cat });
             renderModalContent(monthsData[currentEditingIndex]);
             renderMainGrid();
