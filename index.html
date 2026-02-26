@@ -245,7 +245,7 @@
 
     <div id="saveStatus">
         <div class="status-dot" id="syncIndicator"></div>
-        <span id="statusText">A ligar à nuvem...</span>
+        <span id="statusText">A carregar...</span>
     </div>
 
     <div class="presentation-page relative">
@@ -328,10 +328,10 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIGURAÇÃO FIREBASE DO UTILIZADOR (plannerr-76af0)
+        // CONFIGURAÇÃO OFICIAL DO TEU FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDoiKeXB6Ifi4ES2kRaT8RSZz-iu3sU7KE",
             authDomain: "plannerr-76af0.firebaseapp.com",
@@ -342,9 +342,7 @@
             measurementId: "G-3Z9751F490"
         };
 
-        const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'plannerr-76af0';
-
+        // Dados padrão para mostrar imediatamente (Zero Atraso Visual)
         let monthsData = [
             { name: 'Janeiro', id: 0, startDay: 4, days: 31, items: [] },
             { name: 'Fevereiro', id: 1, startDay: 0, days: 28, items: [] },
@@ -366,39 +364,25 @@
         let db = null;
         let auth = null;
 
+        // Renderiza imediatamente para que não haja tela em branco
+        renderMainGrid();
+
         const initFirebase = async () => {
             try {
-                const configToUse = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
-                const app = initializeApp(configToUse);
+                const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                const performAuth = async () => {
-                    try {
-                        if (initialToken && initialToken !== "" && initialToken !== "null") {
-                            try {
-                                await signInWithCustomToken(auth, initialToken);
-                            } catch (tokenError) {
-                                console.warn("Token incompatível com o novo projeto. A fazer fallback para login anónimo...", tokenError);
-                                await signInAnonymously(auth);
-                            }
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (e) {
-                        console.error("Auth Error:", e);
-                        if (e.code === 'auth/configuration-not-found' || e.code === 'auth/operation-not-allowed') {
-                            document.getElementById('statusText').innerText = "Ative 'Login Anónimo' no Console";
-                            document.getElementById('syncIndicator').classList.add('offline');
-                        } else {
-                            document.getElementById('statusText').innerText = "Modo Offline";
-                        }
-                        renderMainGrid();
-                        return null;
-                    }
-                };
-
-                await performAuth();
+                // Removida a tentativa de usar o Token do Canvas. Agora ele conecta direto
+                // ao TEU projeto como utilizador anónimo. O atraso desaparece aqui.
+                try {
+                    await signInAnonymously(auth);
+                } catch (authError) {
+                    console.error("Erro no Auth:", authError);
+                    document.getElementById('statusText').innerText = "Ative 'Login Anónimo' no Firebase";
+                    document.getElementById('syncIndicator').classList.add('offline');
+                    return;
+                }
 
                 onAuthStateChanged(auth, (u) => {
                     user = u;
@@ -406,8 +390,9 @@
                         document.getElementById('statusText').innerText = "Ligado à Nuvem";
                         document.getElementById('syncIndicator').classList.add('online');
                         
-                        // REGRA 1: Caminho estrito de documentos
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerData', 'mainDoc');
+                        // CAMINHO SIMPLIFICADO: Mais fácil de encontrares no teu Firebase Console
+                        // Vai aparecer uma pasta "planner" e um documento "dados2026"
+                        const docRef = doc(db, 'planner', 'dados2026');
                         
                         onSnapshot(docRef, (snapshot) => {
                             if (snapshot.exists()) {
@@ -415,18 +400,19 @@
                                 renderMainGrid();
                                 if (currentEditingIndex !== null) renderModalContent(monthsData[currentEditingIndex]);
                             } else { 
+                                // Cria o documento na primeira vez que liga
                                 persistToCloud(); 
                             }
                         }, (err) => {
-                            console.error("Firestore error:", err);
-                            document.getElementById('statusText').innerText = "Erro de Sincronização";
+                            console.error("Erro de Leitura Firestore:", err);
+                            document.getElementById('statusText').innerText = "Acesso Negado (Verifique Regras)";
+                            document.getElementById('syncIndicator').classList.replace('online', 'offline');
                         });
                     }
                 });
             } catch (error) { 
-                console.error("Critical Init Error:", error);
-                renderMainGrid(); 
-                document.getElementById('statusText').innerText = "Erro de Configuração";
+                console.error("Erro crítico:", error);
+                document.getElementById('statusText').innerText = "Erro Crítico";
             }
         };
 
@@ -437,18 +423,22 @@
             status.classList.remove('online');
             status.classList.add('syncing'); 
             text.innerText = "A sincronizar...";
+            
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerData', 'mainDoc');
+                // Salva os dados no caminho simplificado
+                const docRef = doc(db, 'planner', 'dados2026');
                 await setDoc(docRef, { months: monthsData });
+                
                 status.classList.remove('syncing'); 
                 status.classList.add('online');
                 text.innerText = "Sincronizado";
             } catch (e) { 
-                console.error("Save Error:", e);
+                console.error("Erro a Gravar:", e);
                 text.innerText = "Erro ao Gravar"; 
             }
         }
 
+        // Funções de Interface Visual (Inalteradas)
         function renderMainGrid() {
             const grid = document.getElementById('mainGrid');
             if (!grid) return;
@@ -552,6 +542,7 @@
             
             if (!monthsData[currentEditingIndex].items) monthsData[currentEditingIndex].items = [];
             monthsData[currentEditingIndex].items.push({ d, t, cat });
+            
             renderModalContent(monthsData[currentEditingIndex]);
             renderMainGrid();
             if (user) persistToCloud();
@@ -570,6 +561,7 @@
             setTimeout(() => { document.getElementById('monthModal').style.display = 'none'; currentEditingIndex = null; }, 400);
         };
 
+        // Inicia
         initFirebase();
     </script>
 </body>
