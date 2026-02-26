@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner Estratégico 2026 - IA & Cloud Conectado</title>
+    <title>Planner Estratégico 2026 - Gestão Clínica Profissional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,8 @@
             --accent-gold: #c5a059;
             --soft-gray: #f4f1ee;
             --border-color: #e5e1dc;
-            --ai-purple: #8b5cf6;
+            --campanha-bg: #1e293b;
+            --comemorativa-bg: #c5a059;
         }
 
         body {
@@ -28,7 +29,7 @@
         }
 
         .presentation-page {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: var(--bg-neutral);
             border-radius: 4px;
@@ -49,64 +50,72 @@
 
         .timeline-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 40px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
             margin-top: 60px;
         }
 
         .month-card {
-            border-left: 1px solid var(--border-color);
-            padding-left: 25px;
-            padding-bottom: 20px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 8px;
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             cursor: pointer;
             position: relative;
-        }
-
-        .month-card::after {
-            content: '+ editar';
-            position: absolute;
-            right: 0;
-            top: 0;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent-gold);
-            opacity: 0;
-            transition: opacity 0.3s;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
         }
 
         .month-card:hover {
-            border-left-color: var(--accent-gold);
-            transform: translateX(8px);
-            background: rgba(197, 160, 89, 0.02);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+            border-color: var(--accent-gold);
         }
 
-        .month-card:hover::after { opacity: 1; }
-
         .month-name {
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 3px;
             color: var(--accent-gold);
-            font-weight: 600;
-            margin-bottom: 15px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--soft-gray);
+            padding-bottom: 10px;
         }
 
-        .event-item { margin-bottom: 12px; }
-        .event-date { font-size: 22px; font-weight: 700; display: block; margin-bottom: 2px; }
-        .event-title { font-size: 15px; color: #555; font-weight: 400; }
-
-        .strategy-tag {
-            font-size: 9px;
-            background: var(--soft-gray);
-            padding: 2px 8px;
-            border-radius: 100px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: inline-block;
-            margin-top: 4px;
+        /* DASHBOARD ITEM STYLES */
+        .dash-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 12px;
         }
+
+        .dash-day {
+            font-weight: 700;
+            color: var(--text-main);
+            min-width: 20px;
+        }
+
+        .dash-label {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #555;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dot-campanha { background: var(--campanha-bg); }
+        .dot-comemorativa { background: var(--comemorativa-bg); }
+        .dot-postagem { background: #cbd5e1; }
 
         /* MODAL */
         #monthModal {
@@ -127,7 +136,7 @@
         .modal-content {
             background: var(--bg-neutral);
             width: 95%;
-            max-width: 1100px;
+            max-width: 1200px;
             max-height: 90vh;
             padding: 40px;
             border-radius: 2px;
@@ -137,8 +146,6 @@
             box-shadow: 0 40px 100px rgba(0,0,0,0.1);
             overflow-y: auto;
         }
-
-        #monthModal.active .modal-content { transform: translateY(0); }
 
         .calendar-grid {
             display: grid;
@@ -170,34 +177,40 @@
             transition: all 0.2s;
         }
 
-        .calendar-day:hover { background-color: var(--soft-gray); color: var(--accent-gold); }
         .calendar-day.selected { border: 1.5px solid var(--accent-gold); color: var(--accent-gold); font-weight: 800; transform: scale(1.05); }
-        .calendar-day.event { background: var(--soft-gray); color: var(--text-main); font-weight: 700; }
-        .calendar-day.event::after { content: ''; position: absolute; bottom: 4px; width: 4px; height: 4px; background: var(--accent-gold); border-radius: 50%; }
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+        }
 
-        /* EDITOR & AI */
         .editor-section {
-            background: #fdfcfb;
+            background: #fff;
             border: 1px solid var(--border-color);
             padding: 25px;
             border-radius: 4px;
         }
 
-        .input-field {
+        .input-field, select {
             width: 100%;
             background: transparent;
             border: none;
             border-bottom: 1px solid var(--border-color);
             padding: 8px 0;
             font-size: 14px;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             outline: none;
+            color: var(--text-main);
         }
 
         .btn-gold {
             background: var(--accent-gold);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 30px;
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -205,45 +218,8 @@
             cursor: pointer;
             width: 100%;
             font-weight: 600;
-            transition: opacity 0.2s;
         }
 
-        .btn-ai {
-            background: var(--ai-purple);
-            color: white;
-            padding: 10px 20px;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 15px;
-            transition: all 0.3s;
-        }
-
-        .btn-ai:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        .ai-response {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f5f3ff;
-            border: 1px solid #ddd6fe;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #4c1d95;
-            line-height: 1.6;
-            max-height: 300px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        /* STATUS INDICATOR */
         #saveStatus {
             position: fixed;
             bottom: 20px;
@@ -263,7 +239,6 @@
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }
         .status-dot.online { background: #22c55e; }
         .status-dot.syncing { background: #f97316; animation: pulse 1s infinite; }
-
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
@@ -271,16 +246,16 @@
 
     <div id="saveStatus">
         <div class="status-dot" id="syncIndicator"></div>
-        <span id="statusText">A ligar ao Firebase...</span>
+        <span id="statusText">A preparar...</span>
     </div>
 
     <div class="presentation-page relative">
         <header class="relative z-10 mb-12">
-            <span class="text-xs uppercase tracking-[5px] text-gray-400">Estratégia Regional // 2026</span>
-            <h1 class="playfair text-6xl mt-4 text-gray-800 italic leading-tight">Planner <br>Inteligente Meta</h1>
+            <span class="text-xs uppercase tracking-[5px] text-gray-400 font-semibold">Dashboard Estratégico 2026</span>
+            <h1 class="playfair text-6xl mt-4 text-gray-800 italic leading-tight">Gestão de <br>Campanhas & Metas</h1>
             <div class="header-line"></div>
-            <p class="max-w-xl text-gray-500 font-light leading-relaxed">
-                As suas alterações são gravadas no seu Firestore e as estratégias são otimizadas via Gemini AI.
+            <p class="max-w-2xl text-gray-500 font-light leading-relaxed">
+                Acompanhe o cronograma de ações prioritárias, aniversários da clínica e metas mensais com sincronização em tempo real.
             </p>
         </header>
 
@@ -290,47 +265,64 @@
     <!-- Modal Detalhes -->
     <div id="monthModal">
         <div class="modal-content">
-            <div class="close-modal" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="close-modal absolute top-6 right-6 cursor-pointer text-gray-400 hover:text-gray-800" onclick="closeModal()">
+                <i class="fa-solid fa-xmark fa-xl"></i>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 <!-- Coluna 1: Calendário -->
-                <div>
+                <div class="lg:col-span-4">
                     <span class="month-name" id="modalMonthName">Janeiro</span>
                     <h2 class="playfair text-3xl mt-1 mb-4 italic">Calendário</h2>
                     <div class="calendar-grid" id="calendarGrid"></div>
-                    <div class="mt-8" id="modalEventsList"></div>
-                </div>
-
-                <!-- Coluna 2: Planeamento Humano -->
-                <div>
-                    <div class="editor-section">
-                        <h3 class="playfair text-2xl mb-6 italic text-gray-700">Novo Evento</h3>
-                        <div class="space-y-3">
+                    
+                    <div class="mt-8 border-t pt-6">
+                        <h4 class="text-[10px] uppercase tracking-widest text-gray-400 mb-4">Adicionar Novo Item</h4>
+                        <div class="space-y-4">
                             <div>
-                                <label class="text-[10px] uppercase text-gray-400">Dia</label>
-                                <input type="number" id="newDay" class="input-field" readonly>
+                                <label class="text-[10px] uppercase text-gray-400">Categoria</label>
+                                <select id="newItemCategory">
+                                    <option value="Campanha">Campanha / Meta</option>
+                                    <option value="Comemorativa">Data Comemorativa / Clínica</option>
+                                    <option value="Postagem">Postagem / Conteúdo</option>
+                                </select>
                             </div>
-                            <div>
-                                <label class="text-[10px] uppercase text-gray-400">Título</label>
-                                <input type="text" id="newTitle" class="input-field" placeholder="Ex: Promoção de Verão">
+                            <div class="grid grid-cols-4 gap-2">
+                                <div class="col-span-1">
+                                    <label class="text-[10px] uppercase text-gray-400">Dia</label>
+                                    <input type="number" id="newDay" class="input-field" readonly>
+                                </div>
+                                <div class="col-span-3">
+                                    <label class="text-[10px] uppercase text-gray-400">Título / Assunto</label>
+                                    <input type="text" id="newTitle" class="input-field" placeholder="Ex: Aniversário Dra. Ana">
+                                </div>
                             </div>
-                            <div>
-                                <label class="text-[10px] uppercase text-gray-400">Estratégia</label>
-                                <input type="text" id="newStrategy" class="input-field" placeholder="Ex: Stories + Reels">
-                            </div>
-                            <button class="btn-gold" onclick="saveNewEvent()">Gravar Alteração</button>
+                            <button class="btn-gold" id="btnSave" onclick="saveNewEvent()">Sincronizar Item</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Coluna 3: Inteligência Artificial -->
-                <div>
-                    <div class="editor-section border-purple-100 bg-purple-50/30">
-                        <h3 class="playfair text-2xl mb-4 italic text-purple-800">Consultoria IA ✨</h3>
-                        <p class="text-[11px] text-purple-600 mb-4">Gere sugestões de posts e legendas para os eventos planeados deste mês.</p>
-                        <button id="btnAi" class="btn-ai" onclick="consultAI()">
-                            <i class="fa-solid fa-sparkles"></i> Gerar Estratégia
-                        </button>
-                        <div id="aiResponse" class="ai-response"></div>
+                <!-- Coluna 2: Listas Detalhadas -->
+                <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="editor-section border-t-4 border-slate-800">
+                        <h3 class="playfair text-xl mb-4 font-bold flex items-center">
+                            <i class="fa-solid fa-bullhorn mr-2 text-slate-800"></i> Campanhas e Metas
+                        </h3>
+                        <div id="listCampanhas" class="space-y-3"></div>
+                    </div>
+
+                    <div class="editor-section border-t-4 border-amber-600">
+                        <h3 class="playfair text-xl mb-4 font-bold flex items-center">
+                            <i class="fa-solid fa-cake-candles mr-2 text-amber-600"></i> Comemorações
+                        </h3>
+                        <div id="listComemorativas" class="space-y-3"></div>
+                    </div>
+
+                    <div class="editor-section md:col-span-2 border-t-4 border-gray-300">
+                        <h3 class="playfair text-xl mb-4 font-bold flex items-center">
+                            <i class="fa-solid fa-calendar-check mr-2 text-gray-400"></i> Cronograma de Postagens
+                        </h3>
+                        <div id="listPostagens" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2"></div>
                     </div>
                 </div>
             </div>
@@ -342,8 +334,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIGURAÇÃO FIREBASE DO UTILIZADOR
-        const myManualConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyD2J_7fWhX3mXyuszPk9ksPoyjgLjhknEI",
             authDomain: "planner-4ad1e.firebaseapp.com",
             projectId: "planner-4ad1e",
@@ -352,21 +343,23 @@
             appId: "1:487956848188:web:4af717d7b1200ab4c72d39"
         };
 
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : myManualConfig;
         const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'planner-4ad1e';
-        const apiKey = ""; // Gemini API Key (fornecida pelo ambiente)
 
-        // Dados base (Fallback)
+        // Dados Iniciais Exemplo para demonstração do visual "clean"
         let monthsData = [
-            { name: 'Março', id: 2, startDay: 0, days: 31, events: [{ d: 8, t: 'Dia Mulher', s: 'Homenagem' }] },
-            { name: 'Abril', id: 3, startDay: 3, days: 30, events: [{ d: 5, t: 'Páscoa', s: 'Engajamento' }] },
-            { name: 'Maio', id: 4, startDay: 5, days: 31, events: [{ d: 10, t: 'Dia das Mães', s: 'Vendas' }] },
-            { name: 'Junho', id: 5, startDay: 1, days: 30, events: [{ d: 12, t: 'Namorados', s: 'Promoção' }] },
-            { name: 'Agosto', id: 7, startDay: 6, days: 31, events: [{ d: 9, t: 'Dia dos Pais', s: 'Vendas' }] },
-            { name: 'Outubro', id: 9, startDay: 4, days: 31, events: [{ d: 12, t: 'Crianças', s: 'Social' }] },
-            { name: 'Novembro', id: 10, startDay: 0, days: 30, events: [{ d: 27, t: 'Black Friday', s: 'Ofertas' }] },
-            { name: 'Dezembro', id: 11, startDay: 2, days: 31, events: [{ d: 25, t: 'Natal', s: 'Humanização' }] }
+            { name: 'Janeiro', id: 0, startDay: 4, days: 31, items: [{d: 15, t: 'Aniversário Clínica', cat: 'Comemorativa'}, {d: 20, t: 'Meta Faturamento 100k', cat: 'Campanha'}] },
+            { name: 'Fevereiro', id: 1, startDay: 0, days: 28, items: [{d: 12, t: 'Campanha Botox Day', cat: 'Campanha'}] },
+            { name: 'Março', id: 2, startDay: 0, days: 31, items: [] },
+            { name: 'Abril', id: 3, startDay: 3, days: 30, items: [] },
+            { name: 'Maio', id: 4, startDay: 5, days: 31, items: [{d: 10, t: 'Campanha Mães', cat: 'Campanha'}] },
+            { name: 'Junho', id: 5, startDay: 1, days: 30, items: [] },
+            { name: 'Julho', id: 6, startDay: 3, days: 31, items: [] },
+            { name: 'Agosto', id: 7, startDay: 6, days: 31, items: [] },
+            { name: 'Setembro', id: 8, startDay: 2, days: 30, items: [] },
+            { name: 'Outubro', id: 9, startDay: 4, days: 31, items: [{d: 15, t: 'Outubro Rosa Clínica', cat: 'Comemorativa'}] },
+            { name: 'Novembro', id: 10, startDay: 0, days: 30, items: [{d: 27, t: 'Black Friday Metas', cat: 'Campanha'}] },
+            { name: 'Dezembro', id: 11, startDay: 2, days: 31, items: [{d: 25, t: 'Natal Clínica', cat: 'Comemorativa'}] }
         ];
 
         let currentEditingIndex = null;
@@ -375,45 +368,47 @@
         let db = null;
         let auth = null;
 
-        // INICIALIZAÇÃO FIREBASE (Regra 3: Auth antes de queries)
         const initFirebase = async () => {
             try {
-                const app = initializeApp(firebaseConfig);
+                const configToUse = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
+                const app = initializeApp(configToUse);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                if (initialToken) {
-                    await signInWithCustomToken(auth, initialToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                const performAuth = async () => {
+                    try {
+                        if (initialToken && initialToken !== "") {
+                            await signInWithCustomToken(auth, initialToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (e) {
+                        document.getElementById('statusText').innerText = "Modo Local";
+                        renderMainGrid();
+                        return null;
+                    }
+                };
+
+                await performAuth();
 
                 onAuthStateChanged(auth, (u) => {
                     user = u;
                     if (user) {
-                        // Caminho estrito (Regra 1): /artifacts/{appId}/public/data/{collectionName}/{docId}
+                        document.getElementById('statusText').innerText = "Ligado";
+                        document.getElementById('syncIndicator').classList.add('online');
                         const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerData', 'mainDoc');
-                        
                         onSnapshot(docRef, (snapshot) => {
                             if (snapshot.exists()) {
                                 monthsData = snapshot.data().months;
                                 renderMainGrid();
-                                if (currentEditingIndex !== null) {
-                                    renderCalendar(monthsData[currentEditingIndex]);
-                                    renderModalEvents(monthsData[currentEditingIndex]);
-                                }
-                            } else {
-                                persistToCloud();
-                            }
-                        }, (err) => {
-                            console.error("Erro snapshot:", err);
-                            document.getElementById('statusText').innerText = "Erro de Ligação";
+                                if (currentEditingIndex !== null) renderModalContent(monthsData[currentEditingIndex]);
+                            } else { persistToCloud(); }
                         });
                     }
                 });
-            } catch (error) {
-                console.error("Erro Firebase:", error);
-                renderMainGrid();
+            } catch (error) { 
+                renderMainGrid(); 
+                document.getElementById('statusText').innerText = "Erro Local";
             }
         };
 
@@ -421,74 +416,18 @@
             if (!user || !db) return;
             const status = document.getElementById('syncIndicator');
             const text = document.getElementById('statusText');
-            status.classList.add('syncing');
+            status.classList.remove('online');
+            status.classList.add('syncing'); 
             text.innerText = "A gravar...";
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'plannerData', 'mainDoc');
                 await setDoc(docRef, { months: monthsData });
-                status.classList.remove('syncing'); status.classList.add('online');
+                status.classList.remove('syncing'); 
+                status.classList.add('online');
                 text.innerText = "Sincronizado";
-            } catch (e) { 
-                console.error("Erro ao gravar:", e);
-                text.innerText = "Erro ao gravar"; 
-            }
+            } catch (e) { text.innerText = "Erro Gravação"; }
         }
 
-        // FUNÇÃO IA (GEMINI API)
-        window.consultAI = async () => {
-            const btn = document.getElementById('btnAi');
-            const responseDiv = document.getElementById('aiResponse');
-            const month = monthsData[currentEditingIndex];
-            
-            if (!month.events.length) {
-                responseDiv.innerHTML = "Por favor, adicione pelo menos um evento ao calendário primeiro.";
-                responseDiv.style.display = 'block';
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> A processar...';
-            responseDiv.style.display = 'block';
-            responseDiv.innerHTML = "A IA está a gerar a sua estratégia...";
-
-            const eventsStr = month.events.map(e => `${e.d}: ${e.t} (${e.s})`).join(', ');
-            const prompt = `Atue como um consultor sênior de marketing digital. Para o mês de ${month.name} de 2026, com os eventos: ${eventsStr}. 
-            Sugira 3 ideias de conteúdo (Reels/Carrossel), 1 legenda de alta performance (máximo 99 caracteres) e 1 prompt visual para IA de imagem. 
-            Mantenha o tom profissional e sofisticado.`;
-
-            let retries = 0;
-            const maxRetries = 5;
-            const callGemini = async (delay) => {
-                try {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                    });
-                    const data = await res.json();
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text;
-                } catch (err) {
-                    if (retries < maxRetries) {
-                        retries++;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        return callGemini(delay * 2);
-                    }
-                    throw err;
-                }
-            };
-
-            try {
-                const resultText = await callGemini(1000);
-                responseDiv.innerHTML = resultText ? resultText.replace(/\n/g, '<br>') : "Erro na resposta da IA.";
-            } catch (e) {
-                responseDiv.innerHTML = "Erro ao conectar com a Inteligência Artificial.";
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-sparkles"></i> Gerar Estratégia';
-            }
-        };
-
-        // UI LOGIC
         function renderMainGrid() {
             const grid = document.getElementById('mainGrid');
             if (!grid) return;
@@ -497,13 +436,33 @@
                 const card = document.createElement('div');
                 card.className = 'month-card';
                 card.onclick = () => openMonth(idx);
-                month.events.sort((a,b) => a.d - b.d);
-                let html = `<div class="month-name">${month.name}</div>`;
-                month.events.slice(0, 3).forEach(ev => {
-                    html += `<div class="event-item"><span class="event-date playfair">${ev.d.toString().padStart(2,'0')}</span><span class="event-title text-sm">${ev.t}</span></div>`;
+                
+                // Prioriza Campanhas e Comemorações para o dashboard
+                const priorityItems = month.items
+                    .filter(i => i.cat === 'Campanha' || i.cat === 'Comemorativa')
+                    .sort((a,b) => a.d - b.d)
+                    .slice(0, 4); // Mostra até 4 itens
+                
+                let listHtml = '';
+                priorityItems.forEach(item => {
+                    const dotClass = item.cat === 'Campanha' ? 'dot-campanha' : 'dot-comemorativa';
+                    listHtml += `
+                        <div class="dash-item">
+                            <div class="dot ${dotClass}"></div>
+                            <span class="dash-day">${item.d.toString().padStart(2,'0')}</span>
+                            <span class="dash-label">${item.t}</span>
+                        </div>
+                    `;
                 });
-                if (month.events.length > 3) html += `<div class="text-[9px] text-gray-400">+ ${month.events.length - 3} itens</div>`;
-                card.innerHTML = html;
+
+                if (priorityItems.length === 0) {
+                    listHtml = '<p class="text-[10px] text-gray-300 italic mt-4">Nenhuma campanha prioritária.</p>';
+                }
+
+                card.innerHTML = `
+                    <div class="month-name">${month.name}</div>
+                    <div class="flex-grow">${listHtml}</div>
+                `;
                 grid.appendChild(card);
             });
         }
@@ -512,13 +471,39 @@
             currentEditingIndex = index;
             selectedDay = null;
             document.getElementById('modalMonthName').innerText = monthsData[index].name;
-            renderCalendar(monthsData[index]);
-            renderModalEvents(monthsData[index]);
-            document.getElementById('aiResponse').style.display = 'none';
+            renderModalContent(monthsData[index]);
             const modal = document.getElementById('monthModal');
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('active'), 10);
         };
+
+        window.renderModalContent = (month) => {
+            renderCalendar(month);
+            const listPostagens = document.getElementById('listPostagens');
+            const listCampanhas = document.getElementById('listCampanhas');
+            const listComemorativas = document.getElementById('listComemorativas');
+            listPostagens.innerHTML = ''; listCampanhas.innerHTML = ''; listComemorativas.innerHTML = '';
+            
+            month.items.sort((a,b) => a.d - b.d).forEach((item, idx) => {
+                const itemHtml = `
+                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded group">
+                        <div class="text-xs">
+                            <span class="font-bold text-gray-400 mr-2">${item.d.toString().padStart(2,'0')}</span>
+                            <span>${item.t}</span>
+                        </div>
+                        <button onclick="removeItem(${idx})" class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all">
+                            <i class="fa-solid fa-trash-can fa-xs"></i>
+                        </button>
+                    </div>`;
+                if (item.cat === 'Postagem') listPostagens.innerHTML += itemHtml;
+                else if (item.cat === 'Campanha') listCampanhas.innerHTML += itemHtml;
+                else if (item.cat === 'Comemorativa') listComemorativas.innerHTML += itemHtml;
+            });
+
+            if (!listPostagens.innerHTML) listPostagens.innerHTML = '<p class="text-[10px] text-gray-300 italic">Sem tarefas.</p>';
+            if (!listCampanhas.innerHTML) listCampanhas.innerHTML = '<p class="text-[10px] text-gray-300 italic">Sem campanhas.</p>';
+            if (!listComemorativas.innerHTML) listComemorativas.innerHTML = '<p class="text-[10px] text-gray-300 italic">Sem datas especiais.</p>';
+        }
 
         window.renderCalendar = (month) => {
             const grid = document.getElementById('calendarGrid');
@@ -530,55 +515,36 @@
             for (let i = 1; i <= month.days; i++) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day'; day.innerText = i;
-                if (month.events.find(e => e.d === i)) day.classList.add('event');
+                if (month.items.find(item => item.d === i)) day.classList.add('has-event');
                 if (selectedDay === i) day.classList.add('selected');
                 day.onclick = () => { selectedDay = i; document.getElementById('newDay').value = i; renderCalendar(month); };
                 grid.appendChild(day);
             }
-        };
-
-        window.renderModalEvents = (month) => {
-            const list = document.getElementById('modalEventsList');
-            let html = '<h4 class="text-xs uppercase tracking-widest text-gray-400 mb-4 border-b pb-2">Ativações</h4>';
-            month.events.sort((a,b) => a.d - b.d).forEach((ev, idx) => {
-                html += `<div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-50 text-xs">
-                    <div class="flex items-start gap-3">
-                        <span class="playfair font-bold">${ev.d.toString().padStart(2,'0')}</span>
-                        <div><strong>${ev.t}</strong><br><span class="text-[10px] text-gray-400 uppercase">${ev.s}</span></div>
-                    </div>
-                    <button onclick="removeEvent(${idx})" class="text-gray-300 hover:text-red-400 px-2"><i class="fa-solid fa-trash-can"></i></button>
-                </div>`;
-            });
-            list.innerHTML = html || '<p class="text-[11px] italic text-gray-300">Nenhuma ação.</p>';
-        };
+        }
 
         window.saveNewEvent = async () => {
             const d = parseInt(document.getElementById('newDay').value);
             const t = document.getElementById('newTitle').value;
-            const s = document.getElementById('newStrategy').value;
+            const cat = document.getElementById('newItemCategory').value;
             if (!d || !t) return;
-            monthsData[currentEditingIndex].events.push({ d, t, s });
-            renderCalendar(monthsData[currentEditingIndex]);
-            renderModalEvents(monthsData[currentEditingIndex]);
+            monthsData[currentEditingIndex].items.push({ d, t, cat });
+            renderModalContent(monthsData[currentEditingIndex]);
             renderMainGrid();
-            persistToCloud();
-            document.getElementById('newTitle').value = ''; document.getElementById('newStrategy').value = '';
+            if (user) persistToCloud();
+            document.getElementById('newTitle').value = '';
         };
 
-        window.removeEvent = async (idx) => {
-            monthsData[currentEditingIndex].events.splice(idx, 1);
-            renderCalendar(monthsData[currentEditingIndex]);
-            renderModalEvents(monthsData[currentEditingIndex]);
+        window.removeItem = async (idx) => {
+            monthsData[currentEditingIndex].items.splice(idx, 1);
+            renderModalContent(monthsData[currentEditingIndex]);
             renderMainGrid();
-            persistToCloud();
+            if (user) persistToCloud();
         };
 
         window.closeModal = () => {
             document.getElementById('monthModal').classList.remove('active');
             setTimeout(() => { document.getElementById('monthModal').style.display = 'none'; currentEditingIndex = null; }, 400);
         };
-
-        window.onclick = (e) => { if (e.target.id === 'monthModal') closeModal(); };
 
         initFirebase();
     </script>
