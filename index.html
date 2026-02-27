@@ -484,14 +484,17 @@
                 card.className = 'month-card';
                 card.onclick = () => openMonth(idx);
                 
+                // Removido o filtro que ocultava as postagens, mostrando todas as categorias ordenadas por dia
                 const priorityItems = (month.items || [])
-                    .filter(i => i.cat === 'Campanha' || i.cat === 'Comemorativa')
                     .sort((a,b) => a.d - b.d)
-                    .slice(0, 5); 
+                    .slice(0, 6); 
                 
                 let listHtml = '';
                 priorityItems.forEach(item => {
-                    const dotClass = item.cat === 'Campanha' ? 'dot-campanha' : 'dot-comemorativa';
+                    let dotClass = 'dot-postagem'; // Por padrão será cinza (postagem)
+                    if (item.cat === 'Campanha') dotClass = 'dot-campanha';
+                    else if (item.cat === 'Comemorativa') dotClass = 'dot-comemorativa';
+                    
                     listHtml += `
                         <div class="dash-item">
                             <div class="dot ${dotClass}"></div>
@@ -502,7 +505,7 @@
                 });
 
                 if (priorityItems.length === 0) {
-                    listHtml = '<p class="text-[10px] text-gray-300 italic mt-4">Sem eventos estratégicos.</p>';
+                    listHtml = '<p class="text-[10px] text-gray-300 italic mt-4">Sem eventos agendados.</p>';
                 }
 
                 card.innerHTML = `
