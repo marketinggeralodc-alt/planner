@@ -342,20 +342,56 @@
             measurementId: "G-3Z9751F490"
         };
 
-        // Dados base
+        // Dados base com Datas Comemorativas Odontológicas e Aniversários
         let monthsData = [
-            { name: 'Janeiro', id: 0, startDay: 4, days: 31, items: [] },
-            { name: 'Fevereiro', id: 1, startDay: 0, days: 28, items: [] },
-            { name: 'Março', id: 2, startDay: 0, days: 31, items: [] },
-            { name: 'Abril', id: 3, startDay: 3, days: 30, items: [] },
-            { name: 'Maio', id: 4, startDay: 5, days: 31, items: [] },
-            { name: 'Junho', id: 5, startDay: 1, days: 30, items: [] },
-            { name: 'Julho', id: 6, startDay: 3, days: 31, items: [] },
-            { name: 'Agosto', id: 7, startDay: 6, days: 31, items: [] },
-            { name: 'Setembro', id: 8, startDay: 2, days: 30, items: [] },
-            { name: 'Outubro', id: 9, startDay: 4, days: 31, items: [] },
-            { name: 'Novembro', id: 10, startDay: 0, days: 30, items: [] },
-            { name: 'Dezembro', id: 11, startDay: 2, days: 31, items: [] }
+            { name: 'Janeiro', id: 0, startDay: 4, days: 31, items: [
+                { d: 1, t: 'Ano Novo', cat: 'Comemorativa' }
+            ] },
+            { name: 'Fevereiro', id: 1, startDay: 0, days: 28, items: [
+                { d: 17, t: 'Carnaval', cat: 'Comemorativa' }
+            ] },
+            { name: 'Março', id: 2, startDay: 0, days: 31, items: [
+                { d: 8, t: 'Dia Int. da Mulher', cat: 'Comemorativa' },
+                { d: 20, t: 'Dia Mundial da Saúde Bucal', cat: 'Campanha' }
+            ] },
+            { name: 'Abril', id: 3, startDay: 3, days: 30, items: [
+                { d: 5, t: 'Aniversário Guarda dos Ferreiros', cat: 'Comemorativa' },
+                { d: 5, t: 'Páscoa', cat: 'Comemorativa' },
+                { d: 7, t: 'Dia Mundial da Saúde', cat: 'Postagem' }
+            ] },
+            { name: 'Maio', id: 4, startDay: 5, days: 31, items: [
+                { d: 10, t: 'Dia das Mães', cat: 'Campanha' },
+                { d: 13, t: 'Aniversário Patos de Minas', cat: 'Comemorativa' },
+                { d: 28, t: 'Dia do Cirurgião Bucomaxilo', cat: 'Postagem' }
+            ] },
+            { name: 'Junho', id: 5, startDay: 1, days: 30, items: [
+                { d: 12, t: 'Dia dos Namorados', cat: 'Campanha' }
+            ] },
+            { name: 'Julho', id: 6, startDay: 3, days: 31, items: [
+                { d: 26, t: 'Dia dos Avós (Foco Prótese/Implante)', cat: 'Postagem' }
+            ] },
+            { name: 'Agosto', id: 7, startDay: 6, days: 31, items: [
+                { d: 9, t: 'Dia dos Pais', cat: 'Campanha' }
+            ] },
+            { name: 'Setembro', id: 8, startDay: 2, days: 30, items: [
+                { d: 20, t: 'Dia do Ortodontista', cat: 'Postagem' }
+            ] },
+            { name: 'Outubro', id: 9, startDay: 4, days: 31, items: [
+                { d: 1, t: 'Início Outubro Rosa', cat: 'Campanha' },
+                { d: 2, t: 'Dia Mundial do Sorriso', cat: 'Comemorativa' },
+                { d: 12, t: 'Dia das Crianças (Odontopediatria)', cat: 'Campanha' },
+                { d: 25, t: 'Dia do Dentista Brasileiro', cat: 'Comemorativa' }
+            ] },
+            { name: 'Novembro', id: 10, startDay: 0, days: 30, items: [
+                { d: 1, t: 'Início Novembro Azul', cat: 'Campanha' },
+                { d: 11, t: 'Aniversário Ibiá', cat: 'Comemorativa' },
+                { d: 27, t: 'Black Friday', cat: 'Campanha' }
+            ] },
+            { name: 'Dezembro', id: 11, startDay: 2, days: 31, items: [
+                { d: 2, t: 'Aniversário São Gotardo', cat: 'Comemorativa' },
+                { d: 25, t: 'Natal', cat: 'Comemorativa' },
+                { d: 31, t: 'Réveillon', cat: 'Comemorativa' }
+            ] }
         ];
 
         let currentEditingIndex = null;
@@ -363,7 +399,7 @@
         let db = null;
 
         // 1. CARREGAMENTO ULTRA RÁPIDO: Tenta buscar dados salvos no navegador primeiro
-        const localBackup = localStorage.getItem('planner2026_backup');
+        const localBackup = localStorage.getItem('planner2026_odonto_backup');
         if (localBackup) {
             monthsData = JSON.parse(localBackup);
         }
@@ -379,14 +415,14 @@
                 // Tenta conectar, mas não trava o sistema se der erro
                 signInAnonymously(auth).catch(() => console.log("Acesso anônimo falhou, mas regras estão abertas."));
 
-                // Caminho super simples: pasta 'sistema_clinica', arquivo 'planner_2026'
-                const docRef = doc(db, 'sistema_clinica', 'planner_2026');
+                // Caminho super simples: pasta 'sistema_clinica', arquivo 'planner_2026_odonto'
+                const docRef = doc(db, 'sistema_clinica', 'planner_2026_odonto');
                 
                 onSnapshot(docRef, (snapshot) => {
                     if (snapshot.exists()) {
                         monthsData = snapshot.data().months;
                         // Atualiza o backup local
-                        localStorage.setItem('planner2026_backup', JSON.stringify(monthsData));
+                        localStorage.setItem('planner2026_odonto_backup', JSON.stringify(monthsData));
                         
                         renderMainGrid();
                         if (currentEditingIndex !== null) renderModalContent(monthsData[currentEditingIndex]);
@@ -412,7 +448,7 @@
         // 3. FUNÇÃO DE SALVAR FORTE
         async function persistToCloud() {
             // Passo 1: Salva no navegador IMEDIATAMENTE (nunca perde)
-            localStorage.setItem('planner2026_backup', JSON.stringify(monthsData));
+            localStorage.setItem('planner2026_odonto_backup', JSON.stringify(monthsData));
 
             // Passo 2: Manda para o Firebase
             if (!db) return; 
@@ -424,7 +460,7 @@
             text.innerText = "Enviando para nuvem...";
             
             try {
-                const docRef = doc(db, 'sistema_clinica', 'planner_2026');
+                const docRef = doc(db, 'sistema_clinica', 'planner_2026_odonto');
                 // Salva forçado! (Funciona graças as suas regras abertas)
                 await setDoc(docRef, { months: monthsData });
                 
